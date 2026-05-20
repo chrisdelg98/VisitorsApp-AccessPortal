@@ -157,9 +157,9 @@ class UserResource extends Resource
             ->filters([])
             ->recordActions([
                 ActionGroup::make([
-                    EditAction::make(),
-                    DeleteAction::make(),
-                ]),
+                    EditAction::make()->color('gray'),
+                    DeleteAction::make()->color('danger'),
+                ])->color('gray')->tooltip('Actions'),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

@@ -85,12 +85,18 @@ class StationResource extends Resource
             TextInput::make('latitude')
                 ->label('Latitud')
                 ->numeric()
-                ->placeholder('13.6929'),
+                ->minValue(-90)
+                ->maxValue(90)
+                ->extraInputAttributes(['step' => 'any'])
+                ->placeholder('13.811938385010887'),
 
             TextInput::make('longitude')
                 ->label('Longitud')
                 ->numeric()
-                ->placeholder('-89.2182'),
+                ->minValue(-180)
+                ->maxValue(180)
+                ->extraInputAttributes(['step' => 'any'])
+                ->placeholder('-89.42609853826056'),
 
             Toggle::make('is_active')
                 ->label('Activa')
@@ -138,12 +144,13 @@ class StationResource extends Resource
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
+                        ->color('gray')
                         ->visible(fn() => Gate::allows('can-write')),
 
                     Action::make('resetDevice')
                         ->label('Reset tablet')
                         ->icon(Heroicon::OutlinedArrowPath)
-                        ->color('warning')
+                        ->color('gray')
                         ->requiresConfirmation()
                         ->modalHeading('¿Desregistrar tablet?')
                         ->modalDescription('La tablet actual quedará desvinculada. Deberá registrarse nuevamente.')
@@ -153,6 +160,7 @@ class StationResource extends Resource
                     Action::make('deviceLogs')
                         ->label('Historial')
                         ->icon(Heroicon::OutlinedClock)
+                        ->color('gray')
                         ->infolist(fn(Schema $schema, Station $record): Schema =>
                             $schema->components([
                                 RepeatableEntry::make('deviceLogs')
@@ -168,8 +176,9 @@ class StationResource extends Resource
                         ->slideOver(),
 
                     DeleteAction::make()
+                        ->color('danger')
                         ->visible(fn() => Gate::allows('is-super-admin')),
-                ]),
+                ])->color('gray')->tooltip('Actions'),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make()

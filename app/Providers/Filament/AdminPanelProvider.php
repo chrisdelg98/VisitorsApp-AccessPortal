@@ -27,7 +27,10 @@ class AdminPanelProvider extends PanelProvider
             ->path('/')
             ->login()
             ->colors([
-                'primary' => Color::Orange,
+                // Blue primary — clean, professional, great white-text contrast in both light and dark mode
+                'primary' => Color::Blue,
+                // Slate gray — cool blue-gray neutrals that complement the blue primary
+                'gray'    => Color::Slate,
             ])
             ->navigationGroups([
                 'Operaciones',

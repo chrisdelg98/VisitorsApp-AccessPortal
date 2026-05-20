@@ -34,16 +34,16 @@ class StationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDevicePhoneMobile;
 
-    protected static ?string $navigationLabel = 'Estaciones';
+    protected static ?string $navigationLabel = 'Stations';
 
     public static function getNavigationGroup(): string
     {
-        return 'Gestión';
+        return 'Management';
     }
 
-    protected static ?string $modelLabel = 'Estación';
+    protected static ?string $modelLabel = 'Station';
 
-    protected static ?string $pluralModelLabel = 'Estaciones';
+    protected static ?string $pluralModelLabel = 'Stations';
 
     protected static ?int $navigationSort = 10;
 
@@ -61,29 +61,29 @@ class StationResource extends Resource
     {
         return $schema->components([
             TextInput::make('name')
-                ->label('Nombre')
+                ->label('Name')
                 ->required()
                 ->maxLength(100),
 
             TextInput::make('code')
-                ->label('Código')
+                ->label('Code')
                 ->required()
                 ->maxLength(20)
                 ->unique(ignoreRecord: true)
-                ->helperText('Ej: EFL-001'),
+                ->helperText('e.g. EFL-001'),
 
             TextInput::make('location')
-                ->label('Ubicación')
+                ->label('Location')
                 ->maxLength(100),
 
             Select::make('country_id')
-                ->label('País')
+                ->label('Country')
                 ->options(Country::where('is_active', true)->pluck('name', 'id'))
                 ->searchable()
                 ->required(),
 
             TextInput::make('latitude')
-                ->label('Latitud')
+                ->label('Latitude')
                 ->numeric()
                 ->minValue(-90)
                 ->maxValue(90)
@@ -91,7 +91,7 @@ class StationResource extends Resource
                 ->placeholder('13.811938385010887'),
 
             TextInput::make('longitude')
-                ->label('Longitud')
+                ->label('Longitude')
                 ->numeric()
                 ->minValue(-180)
                 ->maxValue(180)
@@ -99,7 +99,7 @@ class StationResource extends Resource
                 ->placeholder('-89.42609853826056'),
 
             Toggle::make('is_active')
-                ->label('Activa')
+                ->label('Active')
                 ->default(true),
         ]);
     }
@@ -109,32 +109,32 @@ class StationResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('code')
-                    ->label('Código')
+                    ->label('Code')
                     ->searchable()
                     ->sortable()
                     ->badge(),
 
                 TextColumn::make('name')
-                    ->label('Nombre')
+                    ->label('Name')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('location')
-                    ->label('Ubicación')
+                    ->label('Location')
                     ->placeholder('—')
                     ->toggleable(),
 
                 TextColumn::make('country.name')
-                    ->label('País')
+                    ->label('Country')
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label('Activa')
+                    ->label('Active')
                     ->boolean(),
 
                 TextColumn::make('device_model')
                     ->label('Tablet')
-                    ->placeholder('Sin registrar')
+                    ->placeholder('Not registered')
                     ->description(fn(Station $record): ?string =>
                         $record->registered_at?->format('d/m/Y H:i')
                     ),
@@ -152,23 +152,23 @@ class StationResource extends Resource
                         ->icon(Heroicon::OutlinedArrowPath)
                         ->color('gray')
                         ->requiresConfirmation()
-                        ->modalHeading('¿Desregistrar tablet?')
-                        ->modalDescription('La tablet actual quedará desvinculada. Deberá registrarse nuevamente.')
+                        ->modalHeading('Unregister tablet?')
+                        ->modalDescription('The current tablet will be unlinked. It will need to be registered again.')
                         ->action(fn(Station $record) => $record->unregisterDevice('admin_reset'))
                         ->visible(fn(Station $record) => $record->is_registered && Gate::allows('can-write')),
 
                     Action::make('deviceLogs')
-                        ->label('Historial')
+                        ->label('History')
                         ->icon(Heroicon::OutlinedClock)
                         ->color('gray')
                         ->infolist(fn(Schema $schema, Station $record): Schema =>
                             $schema->components([
                                 RepeatableEntry::make('deviceLogs')
-                                    ->label('Dispositivos registrados')
+                                    ->label('Registered devices')
                                     ->schema([
-                                        TextEntry::make('device_model')->label('Modelo'),
-                                        TextEntry::make('registered_at')->label('Registrado el')->dateTime('d/m/Y H:i'),
-                                        TextEntry::make('unregistered_by')->label('Desregistrado por')->badge(),
+                                        TextEntry::make('device_model')->label('Model'),
+                                        TextEntry::make('registered_at')->label('Registered at')->dateTime('d/m/Y H:i'),
+                                        TextEntry::make('unregistered_by')->label('Unregistered by')->badge(),
                                     ])
                                     ->record($record),
                             ])

@@ -21,16 +21,16 @@ class VisitorResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static ?string $navigationLabel = 'Visitantes';
+    protected static ?string $navigationLabel = 'Visitors';
 
     public static function getNavigationGroup(): string
     {
-        return 'Registros';
+        return 'Records';
     }
 
-    protected static ?string $pluralModelLabel = 'Visitantes';
+    protected static ?string $pluralModelLabel = 'Visitors';
 
-    protected static ?string $modelLabel = 'Visitante';
+    protected static ?string $modelLabel = 'Visitor';
 
     protected static ?int $navigationSort = 20;
 
@@ -69,33 +69,33 @@ class VisitorResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('full_name')
-                    ->label('Visitante')
+                    ->label('Visitor')
                     ->searchable(['first_name', 'last_name'])
                     ->sortable('first_name'),
 
                 TextColumn::make('document_number')
-                    ->label('Documento')
+                    ->label('Document')
                     ->searchable()
                     ->placeholder('—'),
 
                 TextColumn::make('document_type')
-                    ->label('Tipo')
+                    ->label('Type')
                     ->badge()
                     ->placeholder('—'),
 
                 TextColumn::make('company')
-                    ->label('Empresa')
+                    ->label('Company')
                     ->searchable()
                     ->placeholder('—')
                     ->toggleable(),
 
                 TextColumn::make('visits_count')
-                    ->label('Visitas')
+                    ->label('Visits')
                     ->sortable()
                     ->alignCenter(),
 
                 TextColumn::make('visits_max_check_in')
-                    ->label('Última visita')
+                    ->label('Last visit')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->placeholder('—'),

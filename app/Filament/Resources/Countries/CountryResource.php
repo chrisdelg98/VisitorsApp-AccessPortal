@@ -25,16 +25,16 @@ class CountryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
 
-    protected static ?string $navigationLabel = 'Países';
+    protected static ?string $navigationLabel = 'Countries';
 
     public static function getNavigationGroup(): string
     {
-        return 'Sistema';
+        return 'System';
     }
 
-    protected static ?string $modelLabel = 'País';
+    protected static ?string $modelLabel = 'Country';
 
-    protected static ?string $pluralModelLabel = 'Países';
+    protected static ?string $pluralModelLabel = 'Countries';
 
     protected static ?int $navigationSort = 20;
 
@@ -47,23 +47,23 @@ class CountryResource extends Resource
     {
         return $schema->components([
             TextInput::make('name')
-                ->label('Nombre')
+                ->label('Name')
                 ->required()
                 ->maxLength(100),
 
             TextInput::make('code')
-                ->label('Código')
+                ->label('Code')
                 ->required()
                 ->maxLength(5)
                 ->unique(ignoreRecord: true)
                 ->helperText('SV, GT, HN, US, etc.'),
 
             TextInput::make('flag_emoji')
-                ->label('Emoji de bandera')
+                ->label('Flag emoji')
                 ->maxLength(10),
 
             Toggle::make('is_active')
-                ->label('Activo')
+                ->label('Active')
                 ->default(true),
         ]);
     }
@@ -77,17 +77,17 @@ class CountryResource extends Resource
                     ->width('40px'),
 
                 TextColumn::make('name')
-                    ->label('País')
+                    ->label('Country')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('code')
-                    ->label('Código')
+                    ->label('Code')
                     ->badge()
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label('Activo')
+                    ->label('Active')
                     ->boolean(),
             ])
             ->defaultSort('name')

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Gate;
 
 class VisitsChartWidget extends ChartWidget
 {
-    protected ?string $heading = 'Visitas por día — últimos 30 días';
+    protected ?string $heading = 'Visits per day — last 30 days';
 
     protected static ?int $sort = 3;
 
@@ -35,7 +35,7 @@ class VisitsChartWidget extends ChartWidget
             ->orderBy('date')
             ->pluck('total', 'date');
 
-        // Rellenar días sin visitas con 0
+        // Fill days with no visits as 0
         $labels = [];
         $data   = [];
 
@@ -49,7 +49,7 @@ class VisitsChartWidget extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label'           => 'Visitas',
+                    'label'           => 'Visits',
                     'data'            => $data,
                     'backgroundColor' => 'rgba(249, 115, 22, 0.6)',
                     'borderColor'     => 'rgba(249, 115, 22, 1)',

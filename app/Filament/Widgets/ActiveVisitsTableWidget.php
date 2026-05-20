@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Gate;
 
 class ActiveVisitsTableWidget extends TableWidget
 {
-    protected static ?string $heading = 'Visitas activas ahora';
+    protected static ?string $heading = 'Active visits now';
 
     protected ?string $pollingInterval = '30s';
 
@@ -39,30 +39,30 @@ class ActiveVisitsTableWidget extends TableWidget
             })
             ->columns([
                 TextColumn::make('visitor.full_name')
-                    ->label('Visitante')
+                    ->label('Visitor')
                     ->searchable(['visitors.first_name', 'visitors.last_name']),
 
                 TextColumn::make('visitor.company')
-                    ->label('Empresa')
+                    ->label('Company')
                     ->placeholder('—'),
 
                 TextColumn::make('station.code')
-                    ->label('Estación')
+                    ->label('Station')
                     ->badge(),
 
                 TextColumn::make('station.country.name')
-                    ->label('País')
+                    ->label('Country')
                     ->toggleable(),
 
                 TextColumn::make('visiting_person')
-                    ->label('Visita a')
+                    ->label('Visiting')
                     ->placeholder('—'),
 
                 TextColumn::make('check_in')
-                    ->label('Entrada')
+                    ->label('Check in')
                     ->dateTime('d/m/Y H:i')
                     ->description(fn(Visit $record): string =>
-                        'hace ' . $record->check_in->diffForHumans(now(), true)
+                        $record->check_in->diffForHumans()
                     ),
             ])
             ->filters([])

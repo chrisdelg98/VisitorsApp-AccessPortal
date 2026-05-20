@@ -13,11 +13,11 @@
 @endonce
 
 <x-filament-widgets::widget>
-    <x-filament::section heading="Mapa de estaciones">
+    <x-filament::section heading="Station map">
 
         @if(count($stations) === 0)
             <p class="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">
-                No hay estaciones con coordenadas registradas.
+                No stations with registered coordinates.
             </p>
         @else
             <div
@@ -31,15 +31,15 @@
             <div class="flex gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
                 <span class="flex items-center gap-1">
                     <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e"></span>
-                    Activa con tablet
+                    Active with tablet
                 </span>
                 <span class="flex items-center gap-1">
                     <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b"></span>
-                    Activa sin tablet
+                    Active without tablet
                 </span>
                 <span class="flex items-center gap-1">
                     <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444"></span>
-                    Inactiva
+                    Inactive
                 </span>
             </div>
         @endif
@@ -70,9 +70,9 @@ function eflMap(stations) {
             };
 
             const statusLabels = {
-                'active':    'Activa con tablet',
-                'no-tablet': 'Activa sin tablet',
-                'inactive':  'Inactiva',
+                'active':    'Active with tablet',
+                'no-tablet': 'Active without tablet',
+                'inactive':  'Inactive',
             };
 
             const bounds = [];

@@ -13,7 +13,6 @@ class ManageStations extends ManageRecords
 {
     protected static string $resource = StationResource::class;
 
-    // Propiedad Livewire para pasar el PIN entre mutateFormDataUsing y after
     public ?string $newStationPin = null;
 
     protected function getHeaderActions(): array
@@ -36,7 +35,6 @@ class ManageStations extends ManageRecords
                     $data['pin']        = bcrypt($plainPin);
                     $data['pin_lookup'] = $pinLookup;
 
-                    // Guardar en propiedad Livewire para mostrarlo en after()
                     $this->newStationPin = $plainPin;
 
                     return $data;
@@ -44,8 +42,8 @@ class ManageStations extends ManageRecords
                 ->after(function (): void {
                     if ($this->newStationPin) {
                         Notification::make()
-                            ->title('Estación creada — guarda el PIN')
-                            ->body("PIN de la tablet: **{$this->newStationPin}**\n\nEste PIN no se puede recuperar después.")
+                            ->title('Station created — save the PIN')
+                            ->body("Tablet PIN: **{$this->newStationPin}**\n\nThis PIN cannot be recovered later.")
                             ->success()
                             ->persistent()
                             ->send();

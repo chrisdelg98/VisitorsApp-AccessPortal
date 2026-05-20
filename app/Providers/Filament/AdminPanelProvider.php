@@ -33,19 +33,19 @@ class AdminPanelProvider extends PanelProvider
                 'gray'    => Color::Slate,
             ])
             ->navigationGroups([
-                // ── Registros ────────────────────────────────────────────────
-                // 10. Historial de visitas  → VisitResource
-                // 20. Visitantes            → VisitorResource
-                // 30. Dispositivos          → StationDeviceLogResource
-                // Para agregar entre 20 y 30 usa sort = 25 en el nuevo Resource
-                'Registros',
-                // ── Gestión ──────────────────────────────────────────────────
-                // 10. Estaciones            → StationResource
-                'Gestión',
-                // ── Sistema ──────────────────────────────────────────────────
-                // 10. Usuarios              → UserResource
-                // 20. Países                → CountryResource
-                'Sistema',
+                // ── Records ──────────────────────────────────────────────────
+                // 10. Visit History  → VisitResource
+                // 20. Visitors       → VisitorResource
+                // 30. Devices        → StationDeviceLogResource
+                // To insert between 20 and 30, use sort = 25 in the new Resource
+                'Records',
+                // ── Management ───────────────────────────────────────────────
+                // 10. Stations       → StationResource
+                'Management',
+                // ── System ───────────────────────────────────────────────────
+                // 10. Users          → UserResource
+                // 20. Countries      → CountryResource
+                'System',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

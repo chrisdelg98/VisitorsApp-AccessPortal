@@ -20,16 +20,16 @@ class StationDeviceLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDevicePhoneMobile;
 
-    protected static ?string $navigationLabel = 'Dispositivos registrados';
+    protected static ?string $navigationLabel = 'Registered Devices';
 
     public static function getNavigationGroup(): string
     {
-        return 'Registros';
+        return 'Records';
     }
 
-    protected static ?string $pluralModelLabel = 'Dispositivos registrados';
+    protected static ?string $pluralModelLabel = 'Registered Devices';
 
-    protected static ?string $modelLabel = 'Registro de dispositivo';
+    protected static ?string $modelLabel = 'Device Log';
 
     protected static ?int $navigationSort = 30;
 
@@ -69,23 +69,23 @@ class StationDeviceLogResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('station.code')
-                    ->label('Estación')
+                    ->label('Station')
                     ->badge()
                     ->sortable()
                     ->searchable(),
 
                 TextColumn::make('station.name')
-                    ->label('Nombre estación')
+                    ->label('Station name')
                     ->sortable()
                     ->searchable(),
 
                 TextColumn::make('station.country.name')
-                    ->label('País')
+                    ->label('Country')
                     ->sortable()
                     ->toggleable(),
 
                 TextColumn::make('device_model')
-                    ->label('Modelo')
+                    ->label('Model')
                     ->searchable()
                     ->placeholder('—'),
 
@@ -104,17 +104,17 @@ class StationDeviceLogResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('registered_ip')
-                    ->label('IP registrada')
+                    ->label('Registered IP')
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('registered_at')
-                    ->label('Registrada el')
+                    ->label('Registered at')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
                 TextColumn::make('unregistered_by')
-                    ->label('Desregistrada por')
+                    ->label('Unregistered by')
                     ->badge()
                     ->color(fn(string $state): string => match($state) {
                         'admin_reset'   => 'warning',
@@ -123,7 +123,7 @@ class StationDeviceLogResource extends Resource
                     }),
 
                 TextColumn::make('created_at')
-                    ->label('Fecha log')
+                    ->label('Log date')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -131,10 +131,10 @@ class StationDeviceLogResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('unregistered_by')
-                    ->label('Tipo de desregistro')
+                    ->label('Unregister type')
                     ->options([
-                        'admin_reset'   => 'Reset por admin',
-                        'device_logout' => 'Logout del dispositivo',
+                        'admin_reset'   => 'Admin reset',
+                        'device_logout' => 'Device logout',
                     ]),
             ])
             ->recordActions([])

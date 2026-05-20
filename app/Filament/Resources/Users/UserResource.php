@@ -29,16 +29,16 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
-    protected static ?string $navigationLabel = 'Usuarios';
+    protected static ?string $navigationLabel = 'Users';
 
     public static function getNavigationGroup(): string
     {
-        return 'Sistema';
+        return 'System';
     }
 
-    protected static ?string $modelLabel = 'Usuario';
+    protected static ?string $modelLabel = 'User';
 
-    protected static ?string $pluralModelLabel = 'Usuarios';
+    protected static ?string $pluralModelLabel = 'Users';
 
     protected static ?int $navigationSort = 10;
 
@@ -62,7 +62,7 @@ class UserResource extends Resource
     {
         return $schema->components([
             TextInput::make('name')
-                ->label('Nombre')
+                ->label('Name')
                 ->required()
                 ->maxLength(255),
 
@@ -74,7 +74,7 @@ class UserResource extends Resource
                 ->maxLength(255),
 
             TextInput::make('password')
-                ->label('Contraseña')
+                ->label('Password')
                 ->password()
                 ->revealable()
                 ->required(fn(string $operation): bool => $operation === 'create')
@@ -83,7 +83,7 @@ class UserResource extends Resource
                 ->maxLength(255),
 
             Select::make('role')
-                ->label('Rol')
+                ->label('Role')
                 ->options([
                     'super_admin'     => 'Super Admin',
                     'country_manager' => 'Country Manager',
@@ -102,15 +102,15 @@ class UserResource extends Resource
                 ),
 
             Select::make('country_id')
-                ->label('País')
+                ->label('Country')
                 ->options(Country::where('is_active', true)->pluck('name', 'id'))
                 ->searchable()
                 ->required(fn(Get $get): bool => $get('role') !== 'super_admin')
                 ->hidden(fn(Get $get): bool => $get('role') === 'super_admin')
-                ->helperText('Requerido para country_manager y viewer'),
+                ->helperText('Required for country_manager and viewer'),
 
             Toggle::make('is_active')
-                ->label('Activo')
+                ->label('Active')
                 ->default(true),
         ]);
     }
@@ -120,7 +120,7 @@ class UserResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nombre')
+                    ->label('Name')
                     ->searchable()
                     ->sortable(),
 
@@ -129,7 +129,7 @@ class UserResource extends Resource
                     ->searchable(),
 
                 TextColumn::make('role')
-                    ->label('Rol')
+                    ->label('Role')
                     ->badge()
                     ->color(fn(string $state): string => match($state) {
                         'super_admin'     => 'danger',
@@ -139,16 +139,16 @@ class UserResource extends Resource
                     }),
 
                 TextColumn::make('country.name')
-                    ->label('País')
+                    ->label('Country')
                     ->placeholder('—')
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label('Activo')
+                    ->label('Active')
                     ->boolean(),
 
                 TextColumn::make('created_at')
-                    ->label('Creado')
+                    ->label('Created')
                     ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

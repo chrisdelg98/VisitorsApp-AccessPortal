@@ -51,26 +51,26 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
             )->count();
 
         return [
-            Stat::make('Visitas activas', $activeNow)
-                ->description('En este momento')
+            Stat::make('Active visits', $activeNow)
+                ->description('Right now')
                 ->color($activeNow > 0 ? 'success' : 'gray')
                 ->icon('heroicon-o-user-group'),
 
-            Stat::make('Visitas hoy', $today)
+            Stat::make('Visits today', $today)
                 ->description(now()->format('d/m/Y'))
                 ->color('primary')
                 ->icon('heroicon-o-calendar-days'),
 
-            Stat::make('Visitas este mes', $thisMonth)
-                ->description(now()->translatedFormat('F Y'))
+            Stat::make('Visits this month', $thisMonth)
+                ->description(now()->format('F Y'))
                 ->color('primary')
                 ->icon('heroicon-o-chart-bar'),
 
-            Stat::make('Estaciones activas', $activeStations)
+            Stat::make('Active stations', $activeStations)
                 ->color('info')
                 ->icon('heroicon-o-device-phone-mobile'),
 
-            Stat::make('Visitantes registrados', $totalVisitors)
+            Stat::make('Registered visitors', $totalVisitors)
                 ->color('gray')
                 ->icon('heroicon-o-users'),
         ];

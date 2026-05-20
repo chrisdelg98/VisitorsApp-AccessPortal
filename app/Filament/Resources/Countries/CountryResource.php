@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Countries;
 use App\Filament\Resources\Countries\Pages\ManageCountries;
 use App\Models\Country;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -92,8 +93,10 @@ class CountryResource extends Resource
             ->defaultSort('name')
             ->filters([])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

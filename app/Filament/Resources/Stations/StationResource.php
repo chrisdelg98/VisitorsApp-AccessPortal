@@ -8,6 +8,7 @@ use App\Models\Country;
 use App\Models\Station;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -135,38 +136,40 @@ class StationResource extends Resource
             ->defaultSort('code')
             ->filters([])
             ->recordActions([
-                EditAction::make()
-                    ->visible(fn() => Gate::allows('can-write')),
+                ActionGroup::make([
+                    EditAction::make()
+                        ->visible(fn() => Gate::allows('can-write')),
 
-                Action::make('resetDevice')
-                    ->label('Reset tablet')
-                    ->icon(Heroicon::OutlinedArrowPath)
-                    ->color('warning')
-                    ->requiresConfirmation()
-                    ->modalHeading('¿Desregistrar tablet?')
-                    ->modalDescription('La tablet actual quedará desvinculada. Deberá registrarse nuevamente.')
-                    ->action(fn(Station $record) => $record->unregisterDevice('admin_reset'))
-                    ->visible(fn(Station $record) => $record->is_registered && Gate::allows('can-write')),
+                    Action::make('resetDevice')
+                        ->label('Reset tablet')
+                        ->icon(Heroicon::OutlinedArrowPath)
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->modalHeading('¿Desregistrar tablet?')
+                        ->modalDescription('La tablet actual quedará desvinculada. Deberá registrarse nuevamente.')
+                        ->action(fn(Station $record) => $record->unregisterDevice('admin_reset'))
+                        ->visible(fn(Station $record) => $record->is_registered && Gate::allows('can-write')),
 
-                Action::make('deviceLogs')
-                    ->label('Historial')
-                    ->icon(Heroicon::OutlinedClock)
-                    ->infolist(fn(Schema $schema, Station $record): Schema =>
-                        $schema->components([
-                            RepeatableEntry::make('deviceLogs')
-                                ->label('Dispositivos registrados')
-                                ->schema([
-                                    TextEntry::make('device_model')->label('Modelo'),
-                                    TextEntry::make('registered_at')->label('Registrado el')->dateTime('d/m/Y H:i'),
-                                    TextEntry::make('unregistered_by')->label('Desregistrado por')->badge(),
-                                ])
-                                ->record($record),
-                        ])
-                    )
-                    ->slideOver(),
+                    Action::make('deviceLogs')
+                        ->label('Historial')
+                        ->icon(Heroicon::OutlinedClock)
+                        ->infolist(fn(Schema $schema, Station $record): Schema =>
+                            $schema->components([
+                                RepeatableEntry::make('deviceLogs')
+                                    ->label('Dispositivos registrados')
+                                    ->schema([
+                                        TextEntry::make('device_model')->label('Modelo'),
+                                        TextEntry::make('registered_at')->label('Registrado el')->dateTime('d/m/Y H:i'),
+                                        TextEntry::make('unregistered_by')->label('Desregistrado por')->badge(),
+                                    ])
+                                    ->record($record),
+                            ])
+                        )
+                        ->slideOver(),
 
-                DeleteAction::make()
-                    ->visible(fn() => Gate::allows('is-super-admin')),
+                    DeleteAction::make()
+                        ->visible(fn() => Gate::allows('is-super-admin')),
+                ]),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make()

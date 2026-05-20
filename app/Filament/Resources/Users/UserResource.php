@@ -6,9 +6,11 @@ use App\Filament\Resources\Users\Pages\ManageUsers;
 use App\Models\Country;
 use App\Models\User;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -45,6 +47,17 @@ class UserResource extends Resource
         return Gate::allows('is-super-admin');
     }
 
+    public static function canDelete(Model $record): bool
+    {
+        // super_admin accounts are protected from deletion through the panel
+        return $record->role !== 'super_admin';
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return true;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -78,7 +91,15 @@ class UserResource extends Resource
                 ])
                 ->required()
                 ->default('country_manager')
-                ->live(),
+                ->live()
+                // Prevent changing the role of a super_admin through the panel
+                ->disabled(fn(?Model $record): bool => $record?->role === 'super_admin')
+                ->dehydrated(fn(?Model $record): bool => $record?->role !== 'super_admin')
+                ->helperText(fn(?Model $record): ?string =>
+                    $record?->role === 'super_admin'
+                        ? 'The role of a super admin cannot be changed through the panel.'
+                        : null
+                ),
 
             Select::make('country_id')
                 ->label('País')
@@ -135,8 +156,10 @@ class UserResource extends Resource
             ->defaultSort('name')
             ->filters([])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

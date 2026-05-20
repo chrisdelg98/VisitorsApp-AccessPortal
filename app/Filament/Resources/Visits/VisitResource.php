@@ -40,11 +40,11 @@ class VisitResource extends Resource
         return 'Registros';
     }
 
-    protected static ?string $modelLabel = 'Visita';
-
     protected static ?string $pluralModelLabel = 'Historial de visitas';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?string $modelLabel = 'Registro de visita';
+
+    protected static ?int $navigationSort = 10;
 
     public static function canCreate(): bool
     {

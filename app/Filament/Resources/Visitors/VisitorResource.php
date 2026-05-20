@@ -28,11 +28,11 @@ class VisitorResource extends Resource
         return 'Registros';
     }
 
-    protected static ?string $modelLabel = 'Visitante';
-
     protected static ?string $pluralModelLabel = 'Visitantes';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?string $modelLabel = 'Visitante';
+
+    protected static ?int $navigationSort = 20;
 
     public static function canCreate(): bool
     {

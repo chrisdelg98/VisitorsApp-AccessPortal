@@ -27,11 +27,16 @@ class StationDeviceLogResource extends Resource
         return 'Registros';
     }
 
-    protected static ?string $modelLabel = 'Registro de dispositivo';
-
     protected static ?string $pluralModelLabel = 'Dispositivos registrados';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?string $modelLabel = 'Registro de dispositivo';
+
+    protected static ?int $navigationSort = 30;
+
+    public static function canViewAny(): bool
+    {
+        return true;
+    }
 
     public static function canCreate(): bool
     {

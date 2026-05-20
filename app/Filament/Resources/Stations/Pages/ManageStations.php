@@ -13,43 +13,44 @@ class ManageStations extends ManageRecords
 {
     protected static string $resource = StationResource::class;
 
+    // Propiedad Livewire para pasar el PIN entre mutateFormDataUsing y after
+    public ?string $newStationPin = null;
+
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->mutateFormDataUsing(function (array $data): array {
-                    // Generar UUID
+                ->mutateDataUsing(function (array $data): array {
                     $data['id'] = (string) Str::uuid();
 
-                    // Generar API key única
                     do {
                         $apiKey = Str::random(64);
                     } while (Station::where('api_key', $apiKey)->exists());
                     $data['api_key'] = $apiKey;
 
-                    // Generar PIN único de 8 dígitos y almacenarlo en sesión para notificarlo
                     do {
-                        $plainPin = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+                        $plainPin  = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
                         $pinLookup = hash('sha256', $plainPin);
                     } while (Station::where('pin_lookup', $pinLookup)->exists());
 
                     $data['pin']        = bcrypt($plainPin);
                     $data['pin_lookup'] = $pinLookup;
 
-                    // Guardar el PIN en sesión para mostrarlo tras crear
-                    session(['new_station_pin' => $plainPin]);
+                    // Guardar en propiedad Livewire para mostrarlo en after()
+                    $this->newStationPin = $plainPin;
 
                     return $data;
                 })
                 ->after(function (): void {
-                    $pin = session()->pull('new_station_pin');
-                    if ($pin) {
+                    if ($this->newStationPin) {
                         Notification::make()
-                            ->title('Estación creada')
-                            ->body("PIN de la tablet: **{$pin}**  \nGuarda este PIN — no se puede recuperar después.")
+                            ->title('Estación creada — guarda el PIN')
+                            ->body("PIN de la tablet: **{$this->newStationPin}**\n\nEste PIN no se puede recuperar después.")
                             ->success()
                             ->persistent()
                             ->send();
+
+                        $this->newStationPin = null;
                     }
                 }),
         ];

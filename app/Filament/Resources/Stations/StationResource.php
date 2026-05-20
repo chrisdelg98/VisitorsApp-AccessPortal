@@ -150,7 +150,7 @@ class StationResource extends Resource
 
                 Action::make('deviceLogs')
                     ->label('Historial')
-                    ->icon(Heroicon::OutlinedClockHistory ?? Heroicon::OutlinedClock)
+                    ->icon(Heroicon::OutlinedClock)
                     ->infolist(fn(Schema $schema, Station $record): Schema =>
                         $schema->components([
                             RepeatableEntry::make('deviceLogs')

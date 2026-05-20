@@ -33,9 +33,9 @@ class AdminPanelProvider extends PanelProvider
                 'gray'    => Color::Slate,
             ])
             ->navigationGroups([
-                'Operaciones',
-                'Gestión',
-                'Sistema',
+                'Registros',  // Visitantes + Historial de visitas + Tablets — consulta de datos
+                'Gestión',    // Estaciones — gestión activa
+                'Sistema',    // Usuarios + Países
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

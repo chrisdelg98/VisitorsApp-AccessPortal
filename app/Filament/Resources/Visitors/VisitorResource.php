@@ -25,7 +25,7 @@ class VisitorResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return 'Gestión';
+        return 'Registros';
     }
 
     protected static ?string $modelLabel = 'Visitante';

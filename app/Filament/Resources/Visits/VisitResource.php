@@ -33,16 +33,16 @@ class VisitResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
-    protected static ?string $navigationLabel = 'Visitas';
+    protected static ?string $navigationLabel = 'Historial de visitas';
 
     public static function getNavigationGroup(): string
     {
-        return 'Operaciones';
+        return 'Registros';
     }
 
     protected static ?string $modelLabel = 'Visita';
 
-    protected static ?string $pluralModelLabel = 'Visitas';
+    protected static ?string $pluralModelLabel = 'Historial de visitas';
 
     protected static ?int $navigationSort = 1;
 

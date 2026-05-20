@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Visitors\Pages;
 
 use App\Filament\Resources\Visitors\VisitorResource;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
 
 class ManageVisitors extends ManageRecords
@@ -12,8 +11,6 @@ class ManageVisitors extends ManageRecords
 
     protected function getHeaderActions(): array
     {
-        return [
-            CreateAction::make(),
-        ];
+        return [];
     }
 }

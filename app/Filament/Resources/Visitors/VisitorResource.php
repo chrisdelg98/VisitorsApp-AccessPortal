@@ -12,6 +12,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class VisitorResource extends Resource
@@ -49,7 +50,7 @@ class VisitorResource extends Resource
         }
 
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         return $query->whereHas('visits', fn(Builder $q) =>
             $q->whereHas('station', fn(Builder $q2) =>

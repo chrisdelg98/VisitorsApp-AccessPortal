@@ -4,6 +4,7 @@ namespace App\Filament\Traits;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 trait ScopedByCountry
@@ -21,7 +22,7 @@ trait ScopedByCountry
         }
 
         /** @var User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($relation === 'direct') {
             return $query->where('country_id', $user->country_id);

@@ -22,6 +22,7 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class VisitResource extends Resource
@@ -171,12 +172,15 @@ class VisitResource extends Resource
                 SelectFilter::make('station_id')
                     ->label('Estación')
                     ->options(function () {
+                        if (Gate::allows('is-super-admin')) {
+                            return Station::orderBy('code')->pluck('name', 'id');
+                        }
+
                         /** @var \App\Models\User $user */
-                        $user = auth()->user();
+                        $user = Auth::user();
+
                         return Station::query()
-                            ->when(! Gate::allows('is-super-admin'), fn($q) =>
-                                $q->where('country_id', $user->country_id)
-                            )
+                            ->where('country_id', $user->country_id)
                             ->orderBy('code')
                             ->pluck('name', 'id');
                     })

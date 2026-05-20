@@ -9,6 +9,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @property int         $id
+ * @property string      $name
+ * @property string      $email
+ * @property string      $password
+ * @property string      $role
+ * @property string|null $country_id
+ * @property bool        $is_active
+ */
 class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, Notifiable;

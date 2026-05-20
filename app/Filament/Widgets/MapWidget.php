@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Station;
 use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class MapWidget extends Widget
@@ -17,7 +18,7 @@ class MapWidget extends Widget
     protected function getViewData(): array
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         $stations = Station::query()
             ->with('country')

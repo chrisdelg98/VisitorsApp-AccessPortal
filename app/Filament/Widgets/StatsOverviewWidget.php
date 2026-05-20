@@ -7,6 +7,7 @@ use App\Models\Visit;
 use App\Models\Visitor;
 use Filament\Widgets\StatsOverviewWidget as BaseStatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class StatsOverviewWidget extends BaseStatsOverviewWidget
@@ -20,7 +21,7 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
         $isSuperAdmin = Gate::allows('is-super-admin');
 
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         $visitQuery = Visit::query()
             ->when(! $isSuperAdmin, fn($q) =>

@@ -6,6 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string      $id
+ * @property string      $name
+ * @property string      $code
+ * @property string|null $location
+ * @property string|null $country_id
+ * @property float|null  $latitude
+ * @property float|null  $longitude
+ * @property string|null $device_model
+ * @property string|null $device_imei
+ * @property string|null $device_android_id
+ * @property string|null $registered_ip
+ * @property \Carbon\Carbon|null $registered_at
+ * @property bool        $is_active
+ * @property bool        $is_registered
+ */
 class Station extends Model
 {
     protected $connection = 'mysql';

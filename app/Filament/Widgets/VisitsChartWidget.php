@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\Visit;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class VisitsChartWidget extends ChartWidget
@@ -18,7 +19,7 @@ class VisitsChartWidget extends ChartWidget
     protected function getData(): array
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         $start = now()->subDays(29)->startOfDay();
 

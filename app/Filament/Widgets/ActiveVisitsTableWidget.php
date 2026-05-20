@@ -7,6 +7,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class ActiveVisitsTableWidget extends TableWidget
@@ -24,7 +25,7 @@ class ActiveVisitsTableWidget extends TableWidget
         return $table
             ->query(function (): Builder {
                 /** @var \App\Models\User $user */
-                $user = auth()->user();
+                $user = Auth::user();
 
                 return Visit::query()
                     ->with(['visitor', 'station'])

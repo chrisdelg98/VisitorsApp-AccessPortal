@@ -47,6 +47,15 @@ return [
             'report' => false,
         ],
 
+        // Points to the API app's private storage where visitor images are saved.
+        // Set API_PRIVATE_STORAGE_PATH in .env to the absolute path on the shared server.
+        'api_images' => [
+            'driver' => 'local',
+            'root'   => env('API_PRIVATE_STORAGE_PATH', storage_path('app/private')),
+            'throw'  => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

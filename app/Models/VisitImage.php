@@ -24,4 +24,9 @@ class VisitImage extends Model
     {
         return $this->belongsTo(Visit::class);
     }
+
+    public function getProxyUrlAttribute(): string
+    {
+        return route('portal.image', ['path' => ltrim($this->file_path, '/')]);
+    }
 }

@@ -11,9 +11,11 @@ use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -67,28 +69,20 @@ class VisitResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Visitor')
-                ->columns(2)
-                ->schema([
-                    TextEntry::make('visitor.full_name')->label('Name'),
-                    TextEntry::make('visitor.document_number')->label('Document')->placeholder('—'),
-                    TextEntry::make('visitor.document_type')->label('Doc. type')->badge()->placeholder('—'),
-                    TextEntry::make('visitor.company')->label('Company')->placeholder('—'),
-                    TextEntry::make('visitor.email')->label('Email')->placeholder('—'),
-                    TextEntry::make('visitor.phone')->label('Phone')->placeholder('—'),
-                ]),
 
-            Section::make('Visit')
-                ->columns(2)
+            // ── Fila 1: header completo en una sola section ───────────────
+            Section::make()
+                ->columns(6)
                 ->schema([
-                    TextEntry::make('station.name')->label('Station'),
-                    TextEntry::make('station.country.name')->label('Country'),
-                    TextEntry::make('visitor_type')->label('Visitor type'),
-                    TextEntry::make('visit_reason')->label('Reason'),
-                    TextEntry::make('visit_reason_custom')->label('Custom reason')->placeholder('—'),
-                    TextEntry::make('visiting_person')->label('Visiting'),
-                    TextEntry::make('check_in')->label('Check in')->dateTime('d/m/Y H:i'),
-                    TextEntry::make('check_out')->label('Check out')->dateTime('d/m/Y H:i')->placeholder('Active'),
+                    TextEntry::make('visitor.full_name')
+                        ->label('Visitor')
+                        ->weight(FontWeight::Bold)
+                        ->columnSpan(3),
+
+                    TextEntry::make('station.name')
+                        ->label('Station')
+                        ->columnSpan(2),
+
                     TextEntry::make('status')
                         ->label('Status')
                         ->badge()
@@ -96,17 +90,86 @@ class VisitResource extends Resource
                             'active'    => 'success',
                             'completed' => 'gray',
                             default     => 'gray',
-                        }),
-                    TextEntry::make('notes')->label('Notes')->placeholder('—')->columnSpanFull(),
+                        })
+                        ->columnSpan(1),
                 ]),
 
+            // ── Fila 2: timeline ──────────────────────────────────────────
+            Section::make()
+                ->columns(3)
+                ->schema([
+                    TextEntry::make('check_in')
+                        ->label('Check in')
+                        ->dateTime('d/m/Y H:i'),
+
+                    TextEntry::make('check_out')
+                        ->label('Check out')
+                        ->dateTime('d/m/Y H:i')
+                        ->placeholder('Still active')
+                        ->color('success'),
+
+                    TextEntry::make('duration_in_minutes')
+                        ->label('Duration (min)')
+                        ->placeholder('—'),
+                ]),
+
+            // ── Fila 3: visitor info + visit details (mitad y mitad) ──────
+            Grid::make(2)
+                ->schema([
+                    Section::make('Visitor info')
+                        ->columns(2)
+                        ->columnSpan(1)
+                        ->schema([
+                            TextEntry::make('visitor.document_number')
+                                ->label('Document')
+                                ->placeholder('—'),
+                            TextEntry::make('visitor.document_type')
+                                ->label('Doc. type')
+                                ->badge()
+                                ->placeholder('—'),
+                            TextEntry::make('visitor.email')
+                                ->label('Email')
+                                ->placeholder('—'),
+                            TextEntry::make('visitor.phone')
+                                ->label('Phone')
+                                ->placeholder('—'),
+                            TextEntry::make('station.country.name')
+                                ->label('Country'),
+                            TextEntry::make('visitor.company')
+                                ->label('Company')
+                                ->placeholder('—'),
+                        ]),
+
+                    Section::make('Visit details')
+                        ->columns(2)
+                        ->columnSpan(1)
+                        ->schema([
+                            TextEntry::make('visitor_type')
+                                ->label('Visitor type'),
+                            TextEntry::make('visit_reason')
+                                ->label('Reason'),
+                            TextEntry::make('visiting_person')
+                                ->label('Visiting'),
+                            TextEntry::make('visit_reason_custom')
+                                ->label('Custom reason')
+                                ->placeholder('—'),
+                            TextEntry::make('notes')
+                                ->label('Notes')
+                                ->placeholder('—')
+                                ->columnSpanFull(),
+                        ]),
+                ]),
+
+            // ── Fila 4: imágenes (ancho completo, colapsada) ──────────────
             Section::make('Images')
                 ->schema([
-                    ImageEntry::make('images.file_path')
-                        ->label('Photos')
-                        ->disk('local')
-                        ->height(200),
-                ]),
+                    ImageEntry::make('images.proxy_url')
+                        ->label('')
+                        ->height(180),
+                ])
+                ->collapsible()
+                ->collapsed(true),
+
         ]);
     }
 
@@ -205,7 +268,7 @@ class VisitResource extends Resource
                     }),
             ])
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()->modalWidth('7xl'),
             ])
             ->toolbarActions([
                 ExportAction::make()

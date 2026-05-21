@@ -4,6 +4,8 @@
         Deny from all
     </FilesMatch>
 
+    Options +FollowSymLinks
+
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>

@@ -9,7 +9,7 @@ use App\Models\Visit;
 use BackedEnum;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
-use Filament\Infolists\Components\ImageEntry;
+use App\Filament\Infolists\Components\PhotoGalleryEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -56,7 +56,7 @@ class VisitResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return static::applyCountryScope(
-            parent::getEloquentQuery()->with(['visitor', 'station.country']),
+            parent::getEloquentQuery()->with(['visitor', 'station.country', 'images']),
             'station'
         );
     }
@@ -163,12 +163,11 @@ class VisitResource extends Resource
             // ── Fila 4: imágenes (ancho completo, colapsada) ──────────────
             Section::make('Images')
                 ->schema([
-                    ImageEntry::make('images.proxy_url')
-                        ->label('')
-                        ->height(180),
+                    PhotoGalleryEntry::make('photo_urls')
+                        ->hiddenLabel(),
                 ])
                 ->collapsible()
-                ->collapsed(true),
+                ->collapsed(false),
 
         ]);
     }

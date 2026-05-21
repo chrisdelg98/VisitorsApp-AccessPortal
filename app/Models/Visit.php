@@ -54,6 +54,16 @@ class Visit extends Model
         return $this->hasMany(VisitImage::class);
     }
 
+    /** Returns all proxy URLs for the portal's photo gallery component. */
+    public function getPhotoUrlsAttribute(): array
+    {
+        return $this->images
+            ->map(fn(VisitImage $img) => $img->proxy_url)
+            ->filter()
+            ->values()
+            ->all();
+    }
+
     public function getDurationInMinutesAttribute(): ?int
     {
         if (! $this->check_in || ! $this->check_out) {

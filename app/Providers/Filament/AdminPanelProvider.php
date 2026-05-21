@@ -26,6 +26,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('/')
             ->login()
+            ->brandLogo(asset('images/logo.png'))
+            ->brandLogoHeight('2.2rem')
+            ->favicon(asset('images/logo.png'))
             ->colors([
                 // Blue primary — clean, professional, great white-text contrast in both light and dark mode
                 'primary' => Color::Blue,
@@ -67,6 +70,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->renderHook('panels::head.end', fn() => '<style>[x-cloak]{display:none!important}</style>');
     }
 }

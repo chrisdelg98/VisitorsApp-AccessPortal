@@ -126,10 +126,10 @@ class VisitorResource extends Resource
                         ]),
                 ]),
 
-            // ── Visit history (custom view to avoid RepeatableEntry quirks) ──
-            Section::make('Visit history')
+            // ── Latest visit (with link to full history page) ─────────────
+            Section::make('Latest visit')
                 ->icon(Heroicon::OutlinedClock)
-                ->description('All visits recorded for this person, most recent first')
+                ->description('Most recent visit recorded for this person')
                 ->columnSpanFull()
                 ->schema([
                     VisitHistoryEntry::make('id')->hiddenLabel(),
@@ -189,7 +189,8 @@ class VisitorResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ManageVisitors::route('/'),
+            'index'   => ManageVisitors::route('/'),
+            'history' => \App\Filament\Resources\Visitors\Pages\VisitorHistory::route('/{record}/history'),
         ];
     }
 }

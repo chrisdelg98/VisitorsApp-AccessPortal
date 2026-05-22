@@ -10,6 +10,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Illuminate\Support\HtmlString;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -26,8 +27,11 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('/')
             ->login()
-            ->brandLogo(asset('images/logo.png'))
-            ->brandLogoHeight('2.2rem')
+            ->brandLogo(new HtmlString(
+                '<img src="' . asset('images/logo.png') . '" class="efl-logo-img" alt="EFL">' .
+                '<span class="efl-logo-text">Access Portal</span>'
+            ))
+            ->brandLogoHeight('2rem')
             ->favicon(asset('images/logo.png'))
             ->colors([
                 // Blue primary — clean, professional, great white-text contrast in both light and dark mode
@@ -71,6 +75,27 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->renderHook('panels::head.end', fn() => '<style>[x-cloak]{display:none!important}</style>');
+            ->renderHook('panels::head.end', fn() => new HtmlString('<style>
+[x-cloak]{display:none!important}
+
+/* ── Sidebar / topbar logo ──────────────────────────────────── */
+.fi-sidebar-header { justify-content:center; }
+.fi-logo { display:flex; align-items:center; justify-content:center; }
+.efl-logo-img  { height:1.7rem; display:block; }
+.efl-logo-text { margin-left:.55rem; font-size:.95rem; font-weight:600;
+                 white-space:nowrap; color:inherit; }
+
+/* ── Login page logo ────────────────────────────────────────── */
+/* Override Filament inline height on the container             */
+.fi-simple-header .fi-logo {
+    height:auto !important;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-bottom:1.75rem;
+}
+.fi-simple-header .efl-logo-img  { height:5rem; width:auto; display:block; }
+.fi-simple-header .efl-logo-text { display:none; }
+</style>'));
     }
 }

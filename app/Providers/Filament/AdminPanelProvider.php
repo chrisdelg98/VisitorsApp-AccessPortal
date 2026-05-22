@@ -96,6 +96,7 @@ class AdminPanelProvider extends PanelProvider
 }
 .fi-simple-header .efl-logo-img  { height:5rem; width:auto; display:block; }
 .fi-simple-header .efl-logo-text { display:none; }
-</style>'));
+</style>'))
+            ->renderHook('panels::body.end', fn() => view('partials.lightbox-bootstrap'));
     }
 }

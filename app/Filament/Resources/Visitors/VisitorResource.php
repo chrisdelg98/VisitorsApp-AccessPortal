@@ -2,12 +2,18 @@
 
 namespace App\Filament\Resources\Visitors;
 
+use App\Filament\Infolists\Components\FacePhotoEntry;
+use App\Filament\Infolists\Components\VisitHistoryEntry;
 use App\Filament\Resources\Visitors\Pages\ManageVisitors;
 use App\Models\Visitor;
 use BackedEnum;
 use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -64,6 +70,73 @@ class VisitorResource extends Resource
         return $schema->components([]);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->components([
+
+            // ── Top: face photo + personal info ─────────────────────────
+            Section::make()
+                ->columnSpanFull()
+                ->schema([
+                    Grid::make(['default' => 1, 'md' => 3])
+                        ->schema([
+                            // Face photo (1 of 3 columns)
+                            FacePhotoEntry::make('face_photo_url')
+                                ->hiddenLabel()
+                                ->columnSpan(1),
+
+                            // Personal info (2 of 3 columns, internal 2-col grid)
+                            Grid::make(2)
+                                ->columnSpan(2)
+                                ->schema([
+                                    TextEntry::make('full_name')
+                                        ->label('Visitor')
+                                        ->weight(FontWeight::Bold)
+                                        ->icon(Heroicon::OutlinedUser)
+                                        ->columnSpanFull(),
+
+                                    TextEntry::make('document_number')
+                                        ->label('Document')
+                                        ->placeholder('—'),
+
+                                    TextEntry::make('document_type')
+                                        ->label('Doc. type')
+                                        ->badge()
+                                        ->placeholder('—'),
+
+                                    TextEntry::make('email')
+                                        ->label('Email')
+                                        ->icon(Heroicon::OutlinedEnvelope)
+                                        ->placeholder('—'),
+
+                                    TextEntry::make('phone')
+                                        ->label('Phone')
+                                        ->icon(Heroicon::OutlinedPhone)
+                                        ->placeholder('—'),
+
+                                    TextEntry::make('company')
+                                        ->label('Company')
+                                        ->icon(Heroicon::OutlinedBuildingOffice2)
+                                        ->placeholder('—'),
+
+                                    TextEntry::make('visits_count')
+                                        ->label('Total visits')
+                                        ->icon(Heroicon::OutlinedClipboardDocumentList),
+                                ]),
+                        ]),
+                ]),
+
+            // ── Visit history (custom view to avoid RepeatableEntry quirks) ──
+            Section::make('Visit history')
+                ->icon(Heroicon::OutlinedClock)
+                ->description('All visits recorded for this person, most recent first')
+                ->columnSpanFull()
+                ->schema([
+                    VisitHistoryEntry::make('id')->hiddenLabel(),
+                ]),
+        ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -103,7 +176,12 @@ class VisitorResource extends Resource
             ->defaultSort('visits_max_check_in', 'desc')
             ->filters([])
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()
+                    ->modalWidth('7xl')
+                    ->modalHeading('Visitor Profile')
+                    ->modalDescription('Personal info and complete visit history')
+                    ->modalIcon(Heroicon::OutlinedUser)
+                    ->modalIconColor('primary'),
             ])
             ->toolbarActions([]);
     }

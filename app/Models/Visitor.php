@@ -43,4 +43,15 @@ class Visitor extends Model
     {
         return trim("{$this->first_name} {$this->last_name}");
     }
+
+    /** Most recent personal_photo across all the visitor's visits (proxy URL). */
+    public function getFacePhotoUrlAttribute(): ?string
+    {
+        $visit = $this->visits()
+            ->orderByDesc('check_in')
+            ->with(['images' => fn($q) => $q->where('type', 'personal_photo')])
+            ->first();
+
+        return $visit?->images?->first()?->proxy_url;
+    }
 }

@@ -2,6 +2,7 @@
     @php
         /** @var \App\Models\Visitor $v */
         $v = $this->getRecord();
+        $latest = $v->latestVisit()->with('station')->first();
         $photoUrl = $v->face_photo_url;
     @endphp
 
@@ -46,6 +47,20 @@
                 <div>
                     <div style="font-size:.7rem; color:#6b7280; text-transform:uppercase; letter-spacing:.04em;">Company</div>
                     <div style="color:#111827;">{{ $v->company ?? '—' }}</div>
+                </div>
+
+                {{-- Data from the latest visit --}}
+                <div>
+                    <div style="font-size:.7rem; color:#6b7280; text-transform:uppercase; letter-spacing:.04em;">Latest type</div>
+                    <div style="color:#111827;">{{ $latest?->visitor_type ?? '—' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:.7rem; color:#6b7280; text-transform:uppercase; letter-spacing:.04em;">Latest station</div>
+                    <div style="color:#111827;">{{ $latest?->station?->name ?? '—' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:.7rem; color:#6b7280; text-transform:uppercase; letter-spacing:.04em;">Latest visit</div>
+                    <div style="color:#111827;">{{ $latest?->check_in?->format('d/m/Y H:i') ?? '—' }}</div>
                 </div>
             </div>
         </div>

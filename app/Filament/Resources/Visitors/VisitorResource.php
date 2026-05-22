@@ -122,6 +122,17 @@ class VisitorResource extends Resource
                                     TextEntry::make('visits_count')
                                         ->label('Total visits')
                                         ->icon(Heroicon::OutlinedClipboardDocumentList),
+
+                                    TextEntry::make('latestVisit.visitor_type')
+                                        ->label('Latest type')
+                                        ->badge()
+                                        ->placeholder('—'),
+
+                                    TextEntry::make('latestVisit.check_in')
+                                        ->label('Latest visit')
+                                        ->dateTime('d/m/Y H:i')
+                                        ->icon(Heroicon::OutlinedCalendarDays)
+                                        ->placeholder('—'),
                                 ]),
                         ]),
                 ]),

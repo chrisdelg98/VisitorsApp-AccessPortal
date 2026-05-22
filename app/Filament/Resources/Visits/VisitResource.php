@@ -7,10 +7,12 @@ use App\Filament\Traits\ScopedByCountry;
 use App\Models\Station;
 use App\Models\Visit;
 use BackedEnum;
-use Filament\Actions\ExportAction;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use App\Filament\Infolists\Components\PhotoGalleryEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Forms\Components\CheckboxList;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Resources\Resource;
@@ -261,10 +263,124 @@ class VisitResource extends Resource
                     ->modalIconColor('primary'),
             ])
             ->toolbarActions([
-                ExportAction::make()
-                    ->exporter(\App\Filament\Exports\VisitExporter::class)
+                Action::make('export')
+                    ->label('Export')
+                    ->icon(Heroicon::OutlinedDocumentArrowDown)
+                    ->color('primary')
+                    ->modalWidth('3xl')
+                    ->modalHeading('Export Visits')
+                    ->modalDescription('Select format and columns. The file downloads directly to your computer.')
+                    ->modalIcon(Heroicon::OutlinedDocumentArrowDown)
+                    ->modalSubmitActionLabel('Download')
+                    ->form([
+                        Select::make('format')
+                            ->label('Format')
+                            ->options(['xlsx' => 'Excel (.xlsx)', 'csv' => 'CSV (.csv)'])
+                            ->default('xlsx')
+                            ->required()
+                            ->native(false),
+
+                        CheckboxList::make('columns')
+                            ->label('Columns')
+                            ->options(static::getExportableColumns())
+                            ->default(array_keys(static::getExportableColumns()))
+                            ->columns(3)
+                            ->bulkToggleable()
+                            ->required(),
+                    ])
+                    ->action(function (array $data, $livewire): StreamedResponse {
+                        $selected = array_intersect_key(
+                            static::getExportableColumns(),
+                            array_flip($data['columns'])
+                        );
+
+                        $query = method_exists($livewire, 'getFilteredTableQuery')
+                            ? $livewire->getFilteredTableQuery()
+                            : static::getEloquentQuery();
+
+                        $query->with(['visitor', 'station.country']);
+
+                        $format    = $data['format'] ?? 'xlsx';
+                        $timestamp = now()->format('Y-m-d-His');
+
+                        if ($format === 'xlsx') {
+                            return response()->streamDownload(function () use ($query, $selected) {
+                                $writer = new \OpenSpout\Writer\XLSX\Writer();
+                                $writer->openToFile('php://output');
+                                $writer->addRow(\OpenSpout\Common\Entity\Row::fromValues(array_values($selected)));
+
+                                $query->chunk(500, function ($rows) use ($writer, $selected) {
+                                    foreach ($rows as $row) {
+                                        $values = [];
+                                        foreach (array_keys($selected) as $key) {
+                                            $v = data_get($row, $key);
+                                            if ($v instanceof \Carbon\CarbonInterface) {
+                                                $v = $v->format('d/m/Y H:i');
+                                            }
+                                            $values[] = $v ?? '';
+                                        }
+                                        $writer->addRow(\OpenSpout\Common\Entity\Row::fromValues($values));
+                                    }
+                                });
+
+                                $writer->close();
+                            }, "visits-{$timestamp}.xlsx", [
+                                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                            ]);
+                        }
+
+                        // CSV fallback
+                        return response()->streamDownload(function () use ($query, $selected) {
+                            $handle = fopen('php://output', 'w');
+                            fwrite($handle, "\xEF\xBB\xBF"); // UTF-8 BOM for Excel
+                            fputcsv($handle, array_values($selected));
+
+                            $query->chunk(500, function ($rows) use ($handle, $selected) {
+                                foreach ($rows as $row) {
+                                    $csv = [];
+                                    foreach (array_keys($selected) as $key) {
+                                        $v = data_get($row, $key);
+                                        if ($v instanceof \Carbon\CarbonInterface) {
+                                            $v = $v->format('d/m/Y H:i');
+                                        }
+                                        $csv[] = (string) ($v ?? '');
+                                    }
+                                    fputcsv($handle, $csv);
+                                }
+                            });
+
+                            fclose($handle);
+                        }, "visits-{$timestamp}.csv", ['Content-Type' => 'text/csv; charset=UTF-8']);
+                    })
                     ->visible(fn() => Gate::allows('can-write')),
             ]);
+    }
+
+    /** Single source of truth for CSV export columns: dot-path => label */
+    protected static function getExportableColumns(): array
+    {
+        return [
+            'id'                       => 'ID',
+            'visitor.full_name'        => 'Visitor',
+            'visitor.document_number'  => 'Document',
+            'visitor.document_type'    => 'Doc. type',
+            'visitor.company'          => 'Company',
+            'visitor.email'            => 'Visitor email',
+            'visitor.phone'            => 'Visitor phone',
+            'station.code'             => 'Station code',
+            'station.name'             => 'Station name',
+            'station.country.name'     => 'Country',
+            'visitor_type'             => 'Visitor type',
+            'visit_reason'             => 'Reason',
+            'visit_reason_custom'      => 'Custom reason',
+            'visiting_person'          => 'Visiting',
+            'check_in'                 => 'Check in',
+            'check_out'                => 'Check out',
+            'duration_in_minutes'      => 'Duration (min)',
+            'status'                   => 'Status',
+            'badge_printed'            => 'Badge printed',
+            'notes'                    => 'Notes',
+        ];
     }
 
     public static function getPages(): array

@@ -70,105 +70,91 @@ class VisitResource extends Resource
     {
         return $schema->components([
 
-            // ── Fila 1: header completo en una sola section ───────────────
+            // ── Top card: summary + timeline stacked in ONE section ──
             Section::make()
-                ->columns(6)
+                ->columnSpanFull()
                 ->schema([
-                    TextEntry::make('visitor.full_name')
-                        ->label('Visitor')
-                        ->weight(FontWeight::Bold)
-                        ->columnSpan(3),
-
-                    TextEntry::make('station.name')
-                        ->label('Station')
-                        ->columnSpan(2),
-
-                    TextEntry::make('status')
-                        ->label('Status')
-                        ->badge()
-                        ->color(fn(string $state): string => match($state) {
-                            'active'    => 'success',
-                            'completed' => 'gray',
-                            default     => 'gray',
-                        })
-                        ->columnSpan(1),
-                ]),
-
-            // ── Fila 2: timeline ──────────────────────────────────────────
-            Section::make()
-                ->columns(3)
-                ->schema([
-                    TextEntry::make('check_in')
-                        ->label('Check in')
-                        ->dateTime('d/m/Y H:i'),
-
-                    TextEntry::make('check_out')
-                        ->label('Check out')
-                        ->dateTime('d/m/Y H:i')
-                        ->placeholder('Still active')
-                        ->color('success'),
-
-                    TextEntry::make('duration_in_minutes')
-                        ->label('Duration (min)')
-                        ->placeholder('—'),
-                ]),
-
-            // ── Fila 3: visitor info + visit details (mitad y mitad) ──────
-            Grid::make(2)
-                ->schema([
-                    Section::make('Visitor info')
-                        ->columns(2)
-                        ->columnSpan(1)
+                    // Sub-row 1: 4-col summary
+                    Grid::make(4)
                         ->schema([
-                            TextEntry::make('visitor.document_number')
-                                ->label('Document')
-                                ->placeholder('—'),
-                            TextEntry::make('visitor.document_type')
-                                ->label('Doc. type')
-                                ->badge()
-                                ->placeholder('—'),
-                            TextEntry::make('visitor.email')
-                                ->label('Email')
-                                ->placeholder('—'),
-                            TextEntry::make('visitor.phone')
-                                ->label('Phone')
-                                ->placeholder('—'),
+                            TextEntry::make('visitor.full_name')
+                                ->label('Visitor')
+                                ->weight(FontWeight::Bold)
+                                ->icon(Heroicon::OutlinedUser),
+
+                            TextEntry::make('station.name')
+                                ->label('Station')
+                                ->icon(Heroicon::OutlinedBuildingOffice2),
+
                             TextEntry::make('station.country.name')
-                                ->label('Country'),
-                            TextEntry::make('visitor.company')
-                                ->label('Company')
-                                ->placeholder('—'),
+                                ->label('Country')
+                                ->icon(Heroicon::OutlinedGlobeAlt),
+
+                            TextEntry::make('status')
+                                ->label('Status')
+                                ->badge()
+                                ->color(fn(string $state): string => match($state) {
+                                    'active'    => 'success',
+                                    'completed' => 'gray',
+                                    default     => 'gray',
+                                }),
                         ]),
 
-                    Section::make('Visit details')
-                        ->columns(2)
-                        ->columnSpan(1)
+                    // Sub-row 2: 3-col timeline
+                    Grid::make(3)
                         ->schema([
-                            TextEntry::make('visitor_type')
-                                ->label('Visitor type'),
-                            TextEntry::make('visit_reason')
-                                ->label('Reason'),
-                            TextEntry::make('visiting_person')
-                                ->label('Visiting'),
-                            TextEntry::make('visit_reason_custom')
-                                ->label('Custom reason')
-                                ->placeholder('—'),
-                            TextEntry::make('notes')
-                                ->label('Notes')
-                                ->placeholder('—')
-                                ->columnSpanFull(),
+                            TextEntry::make('check_in')
+                                ->label('Check in')
+                                ->dateTime('d/m/Y H:i')
+                                ->icon(Heroicon::OutlinedCalendarDays),
+
+                            TextEntry::make('check_out')
+                                ->label('Check out')
+                                ->dateTime('d/m/Y H:i')
+                                ->placeholder('Not checked out')
+                                ->icon(Heroicon::OutlinedCalendarDays),
+
+                            TextEntry::make('duration_in_minutes')
+                                ->label('Duration (min)')
+                                ->placeholder('In progress')
+                                ->icon(Heroicon::OutlinedClock),
                         ]),
                 ]),
 
-            // ── Fila 4: imágenes (ancho completo, colapsada) ──────────────
-            Section::make('Images')
+            // ── Bottom row: three equal cards ──
+            Grid::make(3)
+                ->columnSpanFull()
                 ->schema([
-                    PhotoGalleryEntry::make('photo_urls')
-                        ->hiddenLabel(),
-                ])
-                ->collapsible()
-                ->collapsed(false),
+                    Section::make('Visitor Information')
+                        ->columnSpan(1)
+                        ->icon(Heroicon::OutlinedUser)
+                        ->schema([
+                            TextEntry::make('visitor.document_number')->label('Document')->placeholder('—'),
+                            TextEntry::make('visitor.document_type')->label('Doc. type')->badge()->placeholder('—'),
+                            TextEntry::make('visitor.email')->label('Email')->placeholder('—'),
+                            TextEntry::make('visitor.phone')->label('Phone')->placeholder('—'),
+                            TextEntry::make('visitor.company')->label('Company')->placeholder('—'),
+                        ]),
 
+                    Section::make('Visit Details')
+                        ->columnSpan(1)
+                        ->icon(Heroicon::OutlinedClipboardDocumentList)
+                        ->schema([
+                            TextEntry::make('visitor_type')->label('Visitor type'),
+                            TextEntry::make('visit_reason')->label('Reason'),
+                            TextEntry::make('visiting_person')->label('Visiting'),
+                            TextEntry::make('visit_reason_custom')->label('Custom reason')->placeholder('—'),
+                            TextEntry::make('notes')->label('Notes')->placeholder('—'),
+                        ]),
+
+                    Section::make('Images')
+                        ->columnSpan(1)
+                        ->icon(Heroicon::OutlinedPhoto)
+                        ->collapsible()
+                        ->schema([
+                            PhotoGalleryEntry::make('photo_urls')->hiddenLabel(),
+                        ]),
+                ]),
         ]);
     }
 
@@ -267,7 +253,12 @@ class VisitResource extends Resource
                     }),
             ])
             ->recordActions([
-                ViewAction::make()->modalWidth('7xl'),
+                ViewAction::make()
+                    ->modalWidth('7xl')
+                    ->modalHeading('Visit Record')
+                    ->modalDescription('Detailed information about this visit')
+                    ->modalIcon(Heroicon::OutlinedIdentification)
+                    ->modalIconColor('primary'),
             ])
             ->toolbarActions([
                 ExportAction::make()

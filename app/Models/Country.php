@@ -17,6 +17,7 @@ class Country extends Model
         'name',
         'code',
         'flag_emoji',
+        'timezone',
         'is_active',
     ];
 

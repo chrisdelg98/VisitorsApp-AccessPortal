@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Resources\Visits\VisitResource;
 use App\Models\Station;
 use App\Models\Visit;
+use App\Support\TzFormatter;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -62,7 +63,10 @@ class StationsMap extends Page
                 },
                 'active_visits_count' => (int) ($s->active_visits_count ?? 0),
                 'last_activity_at'    => $s->last_activity_at
-                    ? \Carbon\Carbon::parse($s->last_activity_at)->format('d/m/Y H:i')
+                    ? TzFormatter::plain(\Carbon\Carbon::parse($s->last_activity_at), $s->country)
+                    : null,
+                'last_activity_utc'   => $s->last_activity_at
+                    ? TzFormatter::utcIso(\Carbon\Carbon::parse($s->last_activity_at))
                     : null,
                 'visits_url'          => VisitResource::getUrl('index', [
                     'tableFilters' => ['station_id' => ['value' => $s->id]],

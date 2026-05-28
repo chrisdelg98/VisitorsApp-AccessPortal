@@ -9,6 +9,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -62,6 +63,15 @@ class CountryResource extends Resource
                 ->label('Flag emoji')
                 ->maxLength(10),
 
+            Select::make('timezone')
+                ->label('Timezone')
+                ->options(fn(): array => array_combine(
+                    \DateTimeZone::listIdentifiers(\DateTimeZone::ALL),
+                    \DateTimeZone::listIdentifiers(\DateTimeZone::ALL),
+                ))
+                ->searchable()
+                ->helperText('IANA name (e.g. America/El_Salvador). Used to display times of stations in this country.'),
+
             Toggle::make('is_active')
                 ->label('Active')
                 ->default(true),
@@ -85,6 +95,11 @@ class CountryResource extends Resource
                     ->label('Code')
                     ->badge()
                     ->sortable(),
+
+                TextColumn::make('timezone')
+                    ->label('Timezone')
+                    ->placeholder('—')
+                    ->toggleable(),
 
                 IconColumn::make('is_active')
                     ->label('Active')

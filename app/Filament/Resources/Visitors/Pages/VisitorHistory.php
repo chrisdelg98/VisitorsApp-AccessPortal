@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Visitors\Pages;
 use App\Filament\Resources\Visitors\VisitorResource;
 use App\Filament\Resources\Visits\VisitResource;
 use App\Models\Visit;
+use App\Support\TzFormatter;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
@@ -50,12 +51,18 @@ class VisitorHistory extends Page implements HasTable
             ->columns([
                 TextColumn::make('check_in')
                     ->label('Check in')
-                    ->dateTime('d/m/Y H:i')
+                    ->html()
+                    ->formatStateUsing(fn(Visit $record) =>
+                        TzFormatter::forCountry($record->check_in, $record->station?->country)
+                    )
                     ->sortable(),
 
                 TextColumn::make('check_out')
                     ->label('Check out')
-                    ->dateTime('d/m/Y H:i')
+                    ->html()
+                    ->formatStateUsing(fn(Visit $record) =>
+                        TzFormatter::forCountry($record->check_out, $record->station?->country)
+                    )
                     ->placeholder('Still active')
                     ->sortable(),
 

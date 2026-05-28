@@ -97,6 +97,49 @@ class AdminPanelProvider extends PanelProvider
 .fi-simple-header .efl-logo-img  { height:5rem; width:auto; display:block; }
 .fi-simple-header .efl-logo-text { display:none; }
 </style>'))
-            ->renderHook('panels::body.end', fn() => view('partials.lightbox-bootstrap'));
+            ->renderHook('panels::body.end', fn() => view('partials.lightbox-bootstrap'))
+            ->renderHook('panels::body.end', fn() => new HtmlString(<<<'HTML'
+<script>
+(function () {
+    if (window.__eflTzBound) return;
+    window.__eflTzBound = true;
+
+    var fmt = new Intl.DateTimeFormat(undefined, {
+        year:   'numeric',
+        month:  '2-digit',
+        day:    '2-digit',
+        hour:   '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    });
+
+    function apply() {
+        document.querySelectorAll('.efl-tz').forEach(function (el) {
+            if (el.dataset.eflTzApplied === '1') return;
+            var utc = el.dataset.utc;
+            if (!utc) return;
+            try {
+                var d = new Date(utc);
+                if (isNaN(d.getTime())) return;
+                el.title = 'Tu hora local: ' + fmt.format(d);
+                el.dataset.eflTzApplied = '1';
+            } catch (e) {}
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', apply);
+    document.addEventListener('livewire:navigated', apply);
+    document.addEventListener('livewire:initialized', apply);
+
+    // Filament suele abrir modales / popovers de forma asíncrona; re-aplicar
+    // ante cualquier cambio del DOM (barato porque cacheamos con data-set).
+    var debounce;
+    new MutationObserver(function () {
+        clearTimeout(debounce);
+        debounce = setTimeout(apply, 60);
+    }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+HTML));
     }
 }

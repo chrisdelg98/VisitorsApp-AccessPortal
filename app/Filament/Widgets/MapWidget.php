@@ -5,9 +5,9 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\Visits\VisitResource;
 use App\Models\Station;
 use App\Models\Visit;
+use App\Support\TzFormatter;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class MapWidget extends Widget
@@ -52,7 +52,10 @@ class MapWidget extends Widget
                 },
                 'active_visits_count'  => (int) ($s->active_visits_count ?? 0),
                 'last_activity_at'     => $s->last_activity_at
-                    ? \Carbon\Carbon::parse($s->last_activity_at)->format('d/m/Y H:i')
+                    ? TzFormatter::plain(\Carbon\Carbon::parse($s->last_activity_at), $s->country)
+                    : null,
+                'last_activity_utc'    => $s->last_activity_at
+                    ? TzFormatter::utcIso(\Carbon\Carbon::parse($s->last_activity_at))
                     : null,
                 'visits_url'           => VisitResource::getUrl('index', [
                     'tableFilters' => ['station_id' => ['value' => $s->id]],

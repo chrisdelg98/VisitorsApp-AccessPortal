@@ -6,6 +6,7 @@ use App\Filament\Resources\Stations\Pages\ManageStations;
 use App\Filament\Traits\ScopedByCountry;
 use App\Models\Country;
 use App\Models\Station;
+use App\Support\TzFormatter;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -162,7 +163,10 @@ class StationResource extends Resource
 
                             TextEntry::make('registered_at')
                                 ->label('Registered at')
-                                ->dateTime('d/m/Y H:i')
+                                ->html()
+                                ->formatStateUsing(fn(Station $record) =>
+                                    TzFormatter::forCountry($record->registered_at, $record->country)
+                                )
                                 ->placeholder('—'),
 
                             TextEntry::make('registered_ip')
@@ -216,7 +220,7 @@ class StationResource extends Resource
                     ->label('Tablet')
                     ->placeholder('Not registered')
                     ->description(fn(Station $record): ?string =>
-                        $record->registered_at?->format('d/m/Y H:i')
+                        TzFormatter::plain($record->registered_at, $record->country)
                     ),
             ])
             ->defaultSort('code')
@@ -256,7 +260,13 @@ class StationResource extends Resource
                                     ->state(fn() => $record->deviceLogs)
                                     ->schema([
                                         TextEntry::make('device_model')->label('Model')->placeholder('—'),
-                                        TextEntry::make('registered_at')->label('Registered at')->dateTime('d/m/Y H:i')->placeholder('—'),
+                                        TextEntry::make('registered_at')
+                                            ->label('Registered at')
+                                            ->html()
+                                            ->formatStateUsing(fn($state) =>
+                                                $state ? TzFormatter::forCountry(\Carbon\Carbon::parse($state), $record->country) : null
+                                            )
+                                            ->placeholder('—'),
                                         TextEntry::make('unregistered_by')->label('Unregistered by')->badge()->placeholder('—'),
                                     ]),
                             ])

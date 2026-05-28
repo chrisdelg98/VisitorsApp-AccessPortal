@@ -6,6 +6,7 @@ use App\Filament\Resources\Visits\Pages\ManageVisits;
 use App\Filament\Traits\ScopedByCountry;
 use App\Models\Station;
 use App\Models\Visit;
+use App\Support\TzFormatter;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
@@ -58,7 +59,14 @@ class VisitResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return static::applyCountryScope(
-            parent::getEloquentQuery()->with(['visitor', 'station.country', 'images']),
+            parent::getEloquentQuery()->with([
+                'visitor',
+                'station.country',
+                'images',
+                'originalVisit.station.country',
+                'continuationVisit.station.country',
+                'reentryFromStation.country',
+            ]),
             'station'
         );
     }
@@ -107,12 +115,18 @@ class VisitResource extends Resource
                         ->schema([
                             TextEntry::make('check_in')
                                 ->label('Check in')
-                                ->dateTime('d/m/Y H:i')
+                                ->html()
+                                ->formatStateUsing(fn(Visit $record) =>
+                                    TzFormatter::forCountry($record->check_in, $record->station?->country)
+                                )
                                 ->icon(Heroicon::OutlinedCalendarDays),
 
                             TextEntry::make('check_out')
                                 ->label('Check out')
-                                ->dateTime('d/m/Y H:i')
+                                ->html()
+                                ->formatStateUsing(fn(Visit $record) =>
+                                    TzFormatter::forCountry($record->check_out, $record->station?->country)
+                                )
                                 ->placeholder('Not checked out')
                                 ->icon(Heroicon::OutlinedCalendarDays),
 
@@ -164,7 +178,10 @@ class VisitResource extends Resource
 
                             TextEntry::make('last_reentry_at')
                                 ->label('Último reingreso')
-                                ->dateTime('d/m/Y H:i')
+                                ->html()
+                                ->formatStateUsing(fn(Visit $record) =>
+                                    TzFormatter::forCountry($record->last_reentry_at, $record->station?->country)
+                                )
                                 ->placeholder('—'),
                         ]),
 
@@ -180,12 +197,18 @@ class VisitResource extends Resource
 
                             TextEntry::make('originalVisit.check_in')
                                 ->label('Ingresó allí a las')
-                                ->dateTime('d/m/Y H:i')
+                                ->html()
+                                ->formatStateUsing(fn(Visit $record) =>
+                                    TzFormatter::forCountry($record->originalVisit?->check_in, $record->originalVisit?->station?->country)
+                                )
                                 ->placeholder('—'),
 
                             TextEntry::make('originalVisit.check_out')
                                 ->label('Cierre de aquella visita')
-                                ->dateTime('d/m/Y H:i')
+                                ->html()
+                                ->formatStateUsing(fn(Visit $record) =>
+                                    TzFormatter::forCountry($record->originalVisit?->check_out, $record->originalVisit?->station?->country)
+                                )
                                 ->placeholder('—'),
                         ]),
 
@@ -201,7 +224,10 @@ class VisitResource extends Resource
 
                             TextEntry::make('continuationVisit.check_in')
                                 ->label('Ingresó allá a las')
-                                ->dateTime('d/m/Y H:i')
+                                ->html()
+                                ->formatStateUsing(fn(Visit $record) =>
+                                    TzFormatter::forCountry($record->continuationVisit?->check_in, $record->continuationVisit?->station?->country)
+                                )
                                 ->placeholder('—'),
 
                             TextEntry::make('continuationVisit.status')
@@ -279,12 +305,18 @@ class VisitResource extends Resource
 
                 TextColumn::make('check_in')
                     ->label('Check in')
-                    ->dateTime('d/m/Y H:i')
+                    ->html()
+                    ->formatStateUsing(fn(Visit $record) =>
+                        TzFormatter::forCountry($record->check_in, $record->station?->country)
+                    )
                     ->sortable(),
 
                 TextColumn::make('check_out')
                     ->label('Check out')
-                    ->dateTime('d/m/Y H:i')
+                    ->html()
+                    ->formatStateUsing(fn(Visit $record) =>
+                        TzFormatter::forCountry($record->check_out, $record->station?->country)
+                    )
                     ->placeholder('—')
                     ->sortable(),
 
@@ -437,7 +469,7 @@ class VisitResource extends Resource
                                         foreach (array_keys($selected) as $key) {
                                             $v = data_get($row, $key);
                                             if ($v instanceof \Carbon\CarbonInterface) {
-                                                $v = $v->format('d/m/Y H:i');
+                                                $v = TzFormatter::plain($v, $row->station?->country);
                                             }
                                             $values[] = $v ?? '';
                                         }

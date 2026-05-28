@@ -40,14 +40,14 @@
                 <div>
                     <div style="font-size:.7rem; color:#6b7280; text-transform:uppercase; letter-spacing:.04em;">Check in</div>
                     <div style="font-weight:500; color:#111827;">
-                        {{ $visit->check_in?->format('d/m/Y H:i') ?? '—' }}
+                        {{ \App\Support\TzFormatter::forCountry($visit->check_in, $visit->station?->country) ?? '—' }}
                     </div>
                 </div>
 
                 <div>
                     <div style="font-size:.7rem; color:#6b7280; text-transform:uppercase; letter-spacing:.04em;">Check out</div>
                     <div style="color:{{ $visit->check_out ? '#111827' : '#3b82f6' }}; font-weight:500;">
-                        {{ $visit->check_out?->format('d/m/Y H:i') ?? 'Still active' }}
+                        {{ \App\Support\TzFormatter::forCountry($visit->check_out, $visit->station?->country) ?? 'Still active' }}
                     </div>
                     @if($visit->duration_in_minutes !== null)
                         <div style="font-size:.75rem; color:#6b7280;">{{ $visit->duration_in_minutes }} min</div>

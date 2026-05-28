@@ -137,7 +137,9 @@ function eflMap(stations) {
                         </div>
                         <div class="efl-popup-row">
                             <span>Last activity:</span>
-                            <strong>${s.last_activity_at ?? '—'}</strong>
+                            <strong>${s.last_activity_at
+                                ? `<span class="efl-tz" data-utc="${s.last_activity_utc}">${s.last_activity_at}</span>`
+                                : '—'}</strong>
                         </div>
                         <a href="${s.visits_url}" class="efl-popup-btn">View visits →</a>
                     </div>

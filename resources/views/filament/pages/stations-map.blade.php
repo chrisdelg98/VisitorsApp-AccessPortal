@@ -2,8 +2,7 @@
     <link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}">
     <script src="{{ asset('vendor/leaflet/leaflet.js') }}"></script>
     <style>
-        /* Fondo del "mar" para el mapa offline (sin tiles de OSM) */
-        .efl-map-container .leaflet-container {
+        .efl-map-page .leaflet-container {
             background: #e0f2fe;
         }
         .efl-map-popup .efl-popup-row {
@@ -30,24 +29,23 @@
     </style>
 @endonce
 
-<x-filament-widgets::widget>
-    <x-filament::section heading="Station map">
-
-        @if(count($stations) === 0)
-            <p class="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">
+<x-filament-panels::page>
+    @if(count($stations) === 0)
+        <x-filament::section>
+            <p class="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">
                 No stations with registered coordinates.
             </p>
-        @else
+        </x-filament::section>
+    @else
+        <div class="efl-map-page" wire:ignore>
             <div
-                class="efl-map-container"
-                x-data="eflMap(@js($stations))"
+                x-data="eflStationsMapPage(@js($stations))"
                 x-init="init()"
-                wire:ignore
             >
-                <div id="efl-station-map" style="height: 460px; width: 100%; border-radius: 0.5rem; z-index: 1;"></div>
+                <div id="efl-stations-map-page" style="height: 75vh; width: 100%; border-radius: 0.5rem;"></div>
             </div>
 
-            <div class="flex gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+            <div class="flex flex-wrap gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
                 <span class="flex items-center gap-1">
                     <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e"></span>
                     Active with tablet
@@ -60,42 +58,41 @@
                     <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444"></span>
                     Inactive
                 </span>
+                <span class="ml-auto text-gray-400">{{ count($stations) }} station(s) on the map</span>
             </div>
-        @endif
-
-    </x-filament::section>
-</x-filament-widgets::widget>
+        </div>
+    @endif
+</x-filament-panels::page>
 
 @once
 <script>
-function eflMap(stations) {
+function eflStationsMapPage(stations) {
     return {
         map: null,
 
         init() {
             if (!stations || stations.length === 0) return;
 
-            this.map = L.map('efl-station-map', {
+            this.map = L.map('efl-stations-map-page', {
                 worldCopyJump: true,
                 minZoom: 2,
                 maxZoom: 10,
-            }).setView([15, -80], 4); // arranca centrado en Centroamérica
+            }).setView([15, -80], 4); // Centroamérica por default
 
             // Pane dedicado para los países, DEBAJO del overlayPane (z=400)
             // así los markers siempre quedan visibles encima del fondo.
             this.map.createPane('countriesPane');
             this.map.getPane('countriesPane').style.zIndex = 350;
 
-            // Fondo offline: GeoJSON del mundo (sin tiles externos)
             fetch('{{ asset('geo/world.geo.json') }}')
                 .then(r => r.json())
                 .then(geo => {
                     L.geoJSON(geo, {
                         pane: 'countriesPane',
                         style: {
-                            color:       '#94a3b8', // borde país
+                            color:       '#94a3b8',
                             weight:      0.6,
-                            fillColor:   '#f1f5f9', // tierra
+                            fillColor:   '#f1f5f9',
                             fillOpacity: 1,
                         },
                         interactive: false,

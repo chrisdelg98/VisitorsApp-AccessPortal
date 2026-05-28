@@ -10,6 +10,7 @@ use App\Support\TzFormatter;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use App\Filament\Infolists\Components\PhotoGalleryEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Forms\Components\CheckboxList;
@@ -130,8 +131,8 @@ class VisitResource extends Resource
                                 ->placeholder('Not checked out')
                                 ->icon(Heroicon::OutlinedCalendarDays),
 
-                            TextEntry::make('duration_in_minutes')
-                                ->label('Duration (min)')
+                            TextEntry::make('duration_human')
+                                ->label('Duration')
                                 ->placeholder('In progress')
                                 ->icon(Heroicon::OutlinedClock),
 
@@ -320,8 +321,8 @@ class VisitResource extends Resource
                     ->placeholder('—')
                     ->sortable(),
 
-                TextColumn::make('duration_in_minutes')
-                    ->label('Duration (min)')
+                TextColumn::make('duration_human')
+                    ->label('Duration')
                     ->placeholder('—')
                     ->alignCenter()
                     ->toggleable(),
@@ -415,6 +416,42 @@ class VisitResource extends Resource
                     ->modalDescription('Detailed information about this visit')
                     ->modalIcon(Heroicon::OutlinedIdentification)
                     ->modalIconColor('primary'),
+
+                Action::make('closeVisit')
+                    ->label('Close')
+                    ->iconButton()
+                    ->icon(Heroicon::OutlinedXCircle)
+                    ->color('warning')
+                    ->tooltip('Close visit manually (open >12h)')
+                    ->visible(fn(Visit $record): bool =>
+                        Gate::allows('can-write')
+                        && $record->status === 'active'
+                        && $record->check_out === null
+                        && $record->check_in !== null
+                        && $record->check_in->copy()->addHours(12)->isPast()
+                    )
+                    ->requiresConfirmation()
+                    ->modalIcon(Heroicon::OutlinedExclamationTriangle)
+                    ->modalIconColor('warning')
+                    ->modalHeading('Close this visit?')
+                    ->modalDescription(fn(Visit $record): string =>
+                        'This visit started ' . $record->check_in->diffForHumans()
+                        . '. It will be marked as completed, check-out set to now and tagged as closed by admin.'
+                    )
+                    ->modalSubmitActionLabel('Yes, close it')
+                    ->action(function (Visit $record): void {
+                        $record->update([
+                            'check_out'     => now(),
+                            'status'        => 'completed',
+                            'checkout_type' => 'admin',
+                        ]);
+
+                        Notification::make()
+                            ->title('Visit closed')
+                            ->body(($record->visitor?->full_name ?? 'Visitor') . ' — tagged as admin checkout')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
                 Action::make('export')

@@ -96,4 +96,28 @@ class Visit extends Model
 
         return (int) $this->check_in->diffInMinutes($this->check_out);
     }
+
+    /** Duración legible: "30 min", "2h 15m", "1d 4h", etc. */
+    public function getDurationHumanAttribute(): ?string
+    {
+        $min = $this->duration_in_minutes;
+        if ($min === null) {
+            return null;
+        }
+        if ($min < 60) {
+            return "{$min} min";
+        }
+
+        $h = intdiv($min, 60);
+        $m = $min % 60;
+
+        if ($h < 24) {
+            return $m > 0 ? "{$h}h {$m}m" : "{$h}h";
+        }
+
+        $d = intdiv($h, 24);
+        $h = $h % 24;
+
+        return $h > 0 ? "{$d}d {$h}h" : "{$d}d";
+    }
 }

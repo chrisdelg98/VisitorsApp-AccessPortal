@@ -82,8 +82,8 @@ class VisitorHistory extends Page implements HasTable
                     ->badge()
                     ->toggleable(),
 
-                TextColumn::make('duration_in_minutes')
-                    ->label('Duration (min)')
+                TextColumn::make('duration_human')
+                    ->label('Duration')
                     ->placeholder('—')
                     ->alignCenter(),
 

@@ -49,8 +49,8 @@
                     <div style="color:{{ $visit->check_out ? '#111827' : '#3b82f6' }}; font-weight:500;">
                         {{ \App\Support\TzFormatter::forCountry($visit->check_out, $visit->station?->country) ?? 'Still active' }}
                     </div>
-                    @if($visit->duration_in_minutes !== null)
-                        <div style="font-size:.75rem; color:#6b7280;">{{ $visit->duration_in_minutes }} min</div>
+                    @if($visit->duration_human !== null)
+                        <div style="font-size:.75rem; color:#6b7280;">{{ $visit->duration_human }}</div>
                     @endif
                 </div>
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Visit extends Model
 {
@@ -28,14 +29,19 @@ class Visit extends Model
         'notes',
         'original_visit_id',
         'reentry_from_station_id',
+        'reentry_count',
+        'last_reentry_at',
+        'checkout_type',
     ];
 
     protected function casts(): array
     {
         return [
-            'check_in'      => 'datetime',
-            'check_out'     => 'datetime',
-            'badge_printed' => 'boolean',
+            'check_in'        => 'datetime',
+            'check_out'       => 'datetime',
+            'last_reentry_at' => 'datetime',
+            'badge_printed'   => 'boolean',
+            'reentry_count'   => 'integer',
         ];
     }
 
@@ -52,6 +58,24 @@ class Visit extends Model
     public function images(): HasMany
     {
         return $this->hasMany(VisitImage::class);
+    }
+
+    /** Visita ORIGINAL cuando esta visita es una continuación cross-estación. */
+    public function originalVisit(): BelongsTo
+    {
+        return $this->belongsTo(Visit::class, 'original_visit_id');
+    }
+
+    /** Visita de CONTINUACIÓN cuando esta visita fue seguida en otra sucursal. */
+    public function continuationVisit(): HasOne
+    {
+        return $this->hasOne(Visit::class, 'original_visit_id', 'id');
+    }
+
+    /** Estación de origen cuando esta visita es una continuación cross-estación. */
+    public function reentryFromStation(): BelongsTo
+    {
+        return $this->belongsTo(Station::class, 'reentry_from_station_id');
     }
 
     /** Returns all proxy URLs for the portal's photo gallery component. */

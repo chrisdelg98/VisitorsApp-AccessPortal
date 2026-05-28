@@ -102,8 +102,8 @@ class VisitResource extends Resource
                                 }),
                         ]),
 
-                    // Sub-row 2: 3-col timeline
-                    Grid::make(3)
+                    // Sub-row 2: 4-col timeline + tipo de cierre
+                    Grid::make(4)
                         ->schema([
                             TextEntry::make('check_in')
                                 ->label('Check in')
@@ -120,6 +120,99 @@ class VisitResource extends Resource
                                 ->label('Duration (min)')
                                 ->placeholder('In progress')
                                 ->icon(Heroicon::OutlinedClock),
+
+                            TextEntry::make('checkout_type')
+                                ->label('Closed by')
+                                ->badge()
+                                ->placeholder('—')
+                                ->formatStateUsing(fn (?string $state): string => match ($state) {
+                                    'visitor' => 'Visitor',
+                                    'auto'    => 'Auto (system)',
+                                    'admin'   => 'Admin',
+                                    'reentry' => 'Re-entry',
+                                    default   => '—',
+                                })
+                                ->color(fn (?string $state): string => match ($state) {
+                                    'visitor' => 'success',
+                                    'auto'    => 'warning',
+                                    'admin'   => 'info',
+                                    'reentry' => 'primary',
+                                    default   => 'gray',
+                                }),
+                        ]),
+                ]),
+
+            // ── Recorrido entre sucursales / Re-entradas ──
+            Section::make('Re-entradas y recorrido entre sucursales')
+                ->icon(Heroicon::OutlinedArrowsRightLeft)
+                ->columnSpanFull()
+                ->visible(fn ($record) =>
+                    $record->reentry_from_station_id !== null
+                    || ($record->reentry_count ?? 0) > 0
+                    || $record->continuationVisit !== null
+                )
+                ->schema([
+                    // Re-entradas misma estación (mismo día, ej. salir a almorzar)
+                    Grid::make(2)
+                        ->visible(fn ($record) => ($record->reentry_count ?? 0) > 0)
+                        ->schema([
+                            TextEntry::make('reentry_count')
+                                ->label('Re-entradas mismo día (misma estación)')
+                                ->badge()
+                                ->color('warning')
+                                ->icon(Heroicon::OutlinedArrowPath),
+
+                            TextEntry::make('last_reentry_at')
+                                ->label('Último reingreso')
+                                ->dateTime('d/m/Y H:i')
+                                ->placeholder('—'),
+                        ]),
+
+                    // Esta visita VIENE de otra sucursal (B procede de A)
+                    Grid::make(3)
+                        ->visible(fn ($record) => $record->reentry_from_station_id !== null)
+                        ->schema([
+                            TextEntry::make('reentryFromStation.name')
+                                ->label('← Procedente de la sucursal')
+                                ->icon(Heroicon::OutlinedArrowLeftCircle)
+                                ->weight(FontWeight::Bold)
+                                ->placeholder('—'),
+
+                            TextEntry::make('originalVisit.check_in')
+                                ->label('Ingresó allí a las')
+                                ->dateTime('d/m/Y H:i')
+                                ->placeholder('—'),
+
+                            TextEntry::make('originalVisit.check_out')
+                                ->label('Cierre de aquella visita')
+                                ->dateTime('d/m/Y H:i')
+                                ->placeholder('—'),
+                        ]),
+
+                    // Esta visita SE CONTINUÓ en otra sucursal (A se continúa en B)
+                    Grid::make(3)
+                        ->visible(fn ($record) => $record->continuationVisit !== null)
+                        ->schema([
+                            TextEntry::make('continuationVisit.station.name')
+                                ->label('→ Continuó en la sucursal')
+                                ->icon(Heroicon::OutlinedArrowRightCircle)
+                                ->weight(FontWeight::Bold)
+                                ->placeholder('—'),
+
+                            TextEntry::make('continuationVisit.check_in')
+                                ->label('Ingresó allá a las')
+                                ->dateTime('d/m/Y H:i')
+                                ->placeholder('—'),
+
+                            TextEntry::make('continuationVisit.status')
+                                ->label('Estado en destino')
+                                ->badge()
+                                ->placeholder('—')
+                                ->color(fn (?string $state): string => match ($state) {
+                                    'active'    => 'success',
+                                    'completed' => 'gray',
+                                    default     => 'gray',
+                                }),
                         ]),
                 ]),
 
@@ -209,6 +302,26 @@ class VisitResource extends Resource
                         'completed' => 'gray',
                         default     => 'gray',
                     }),
+
+                TextColumn::make('checkout_type')
+                    ->label('Closed by')
+                    ->badge()
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'visitor' => 'Visitor',
+                        'auto'    => 'Auto',
+                        'admin'   => 'Admin',
+                        'reentry' => 'Re-entry',
+                        default   => '—',
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
+                        'visitor' => 'success',
+                        'auto'    => 'warning',
+                        'admin'   => 'info',
+                        'reentry' => 'primary',
+                        default   => 'gray',
+                    }),
             ])
             ->defaultSort('check_in', 'desc')
             ->filters([
@@ -241,6 +354,15 @@ class VisitResource extends Resource
                     ->options(fn() =>
                         Visit::distinct()->pluck('visitor_type', 'visitor_type')
                     ),
+
+                SelectFilter::make('checkout_type')
+                    ->label('Closed by')
+                    ->options([
+                        'visitor' => 'Visitor (marked exit)',
+                        'auto'    => 'Auto (system)',
+                        'admin'   => 'Admin (manual)',
+                        'reentry' => 'Re-entry (continued elsewhere)',
+                    ]),
 
                 Filter::make('date_range')
                     ->label('Date range')

@@ -1,15 +1,33 @@
 @once
-<link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-/>
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLs="
-    crossorigin=""
-></script>
+    <link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}">
+    <script src="{{ asset('vendor/leaflet/leaflet.js') }}"></script>
+    <style>
+        /* Fondo del "mar" para el mapa offline (sin tiles de OSM) */
+        .efl-map-container .leaflet-container {
+            background: #e0f2fe;
+        }
+        .efl-map-popup .efl-popup-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        .efl-map-popup .efl-popup-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 10px;
+            background: #2563eb;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .efl-map-popup .efl-popup-btn:hover {
+            background: #1d4ed8;
+        }
+    </style>
 @endonce
 
 <x-filament-widgets::widget>
@@ -21,7 +39,8 @@
             </p>
         @else
             <div
-                x-data="eflMap(@json($stations))"
+                class="efl-map-container"
+                x-data="eflMap(@js($stations))"
                 x-init="init()"
                 wire:ignore
             >
@@ -56,12 +75,27 @@ function eflMap(stations) {
         init() {
             if (!stations || stations.length === 0) return;
 
-            this.map = L.map('efl-station-map');
+            this.map = L.map('efl-station-map', {
+                worldCopyJump: true,
+                minZoom: 2,
+                maxZoom: 10,
+            }).setView([15, -80], 4); // arranca centrado en Centroamérica
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                maxZoom: 18,
-            }).addTo(this.map);
+            // Fondo offline: GeoJSON del mundo (sin tiles externos)
+            fetch('{{ asset('geo/world.geo.json') }}')
+                .then(r => r.json())
+                .then(geo => {
+                    L.geoJSON(geo, {
+                        style: {
+                            color:       '#94a3b8', // borde país
+                            weight:      0.6,
+                            fillColor:   '#f1f5f9', // tierra
+                            fillOpacity: 1,
+                        },
+                        interactive: false,
+                    }).addTo(this.map);
+                })
+                .catch(err => console.error('No se pudo cargar el mapa base offline:', err));
 
             const colors = {
                 'active':    '#22c55e',
@@ -80,6 +114,29 @@ function eflMap(stations) {
             stations.forEach(s => {
                 const color = colors[s.status] ?? '#6b7280';
 
+                const popupHtml = `
+                    <div class="efl-map-popup">
+                        <div style="font-weight:600;font-size:14px;margin-bottom:2px">${s.name}</div>
+                        <div style="font-size:12px;color:#64748b">
+                            <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px">${s.code}</code>
+                            · ${s.country}
+                        </div>
+                        <div style="margin-top:4px;color:${color};font-size:12px;font-weight:500">
+                            ${statusLabels[s.status] ?? s.status}
+                        </div>
+                        <hr style="margin:8px 0;border:none;border-top:1px solid #e2e8f0">
+                        <div class="efl-popup-row">
+                            <span>Active visits now:</span>
+                            <strong>${s.active_visits_count}</strong>
+                        </div>
+                        <div class="efl-popup-row">
+                            <span>Last activity:</span>
+                            <strong>${s.last_activity_at ?? '—'}</strong>
+                        </div>
+                        <a href="${s.visits_url}" class="efl-popup-btn">View visits →</a>
+                    </div>
+                `;
+
                 L.circleMarker([s.lat, s.lng], {
                     radius:      9,
                     color:       color,
@@ -87,18 +144,14 @@ function eflMap(stations) {
                     fillOpacity: 0.85,
                     weight:      2,
                 })
-                .bindPopup(
-                    `<strong>${s.name}</strong><br>` +
-                    `<code>${s.code}</code> · ${s.country}<br>` +
-                    `<span style="color:${color}">${statusLabels[s.status] ?? s.status}</span>`
-                )
+                .bindPopup(popupHtml)
                 .addTo(this.map);
 
                 bounds.push([s.lat, s.lng]);
             });
 
             if (bounds.length > 0) {
-                this.map.fitBounds(bounds, { padding: [40, 40] });
+                this.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 7 });
             }
         }
     };

@@ -12,13 +12,18 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -104,6 +109,81 @@ class StationResource extends Resource
         ]);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->components([
+            Section::make()
+                ->columnSpanFull()
+                ->schema([
+                    Grid::make(4)
+                        ->schema([
+                            TextEntry::make('code')
+                                ->label('Code')
+                                ->badge()
+                                ->weight(FontWeight::Bold),
+
+                            TextEntry::make('name')
+                                ->label('Name'),
+
+                            TextEntry::make('country.name')
+                                ->label('Country')
+                                ->icon(Heroicon::OutlinedGlobeAlt),
+
+                            IconEntry::make('is_active')
+                                ->label('Active')
+                                ->boolean(),
+                        ]),
+
+                    Grid::make(3)
+                        ->schema([
+                            TextEntry::make('location')
+                                ->label('Location')
+                                ->placeholder('—'),
+
+                            TextEntry::make('latitude')
+                                ->label('Latitude')
+                                ->placeholder('—'),
+
+                            TextEntry::make('longitude')
+                                ->label('Longitude')
+                                ->placeholder('—'),
+                        ]),
+                ]),
+
+            Section::make('Tablet')
+                ->columnSpanFull()
+                ->icon(Heroicon::OutlinedDevicePhoneMobile)
+                ->schema([
+                    Grid::make(3)
+                        ->schema([
+                            TextEntry::make('device_model')
+                                ->label('Model')
+                                ->placeholder('Not registered'),
+
+                            TextEntry::make('registered_at')
+                                ->label('Registered at')
+                                ->dateTime('d/m/Y H:i')
+                                ->placeholder('—'),
+
+                            TextEntry::make('registered_ip')
+                                ->label('IP')
+                                ->placeholder('—'),
+                        ]),
+
+                    Grid::make(2)
+                        ->schema([
+                            TextEntry::make('device_imei')
+                                ->label('IMEI')
+                                ->placeholder('—'),
+
+                            TextEntry::make('device_android_id')
+                                ->label('Android ID')
+                                ->placeholder('—'),
+                        ]),
+                ]),
+        ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -141,8 +221,14 @@ class StationResource extends Resource
             ])
             ->defaultSort('code')
             ->filters([])
+            ->recordAction('view')
             ->recordActions([
                 ActionGroup::make([
+                    ViewAction::make()
+                        ->color('gray')
+                        ->slideOver()
+                        ->modalHeading('Station details'),
+
                     EditAction::make()
                         ->color('gray')
                         ->visible(fn() => Gate::allows('can-write')),
@@ -161,19 +247,20 @@ class StationResource extends Resource
                         ->label('History')
                         ->icon(Heroicon::OutlinedClock)
                         ->color('gray')
+                        ->slideOver()
+                        ->modalHeading('Tablet history')
                         ->infolist(fn(Schema $schema, Station $record): Schema =>
                             $schema->components([
-                                RepeatableEntry::make('deviceLogs')
+                                RepeatableEntry::make('logs')
                                     ->label('Registered devices')
+                                    ->state(fn() => $record->deviceLogs)
                                     ->schema([
-                                        TextEntry::make('device_model')->label('Model'),
-                                        TextEntry::make('registered_at')->label('Registered at')->dateTime('d/m/Y H:i'),
-                                        TextEntry::make('unregistered_by')->label('Unregistered by')->badge(),
-                                    ])
-                                    ->record($record),
+                                        TextEntry::make('device_model')->label('Model')->placeholder('—'),
+                                        TextEntry::make('registered_at')->label('Registered at')->dateTime('d/m/Y H:i')->placeholder('—'),
+                                        TextEntry::make('unregistered_by')->label('Unregistered by')->badge()->placeholder('—'),
+                                    ]),
                             ])
-                        )
-                        ->slideOver(),
+                        ),
 
                     DeleteAction::make()
                         ->color('danger')

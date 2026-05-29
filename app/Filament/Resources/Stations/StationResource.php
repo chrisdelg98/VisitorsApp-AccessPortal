@@ -15,6 +15,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
@@ -274,12 +275,40 @@ class StationResource extends Resource
 
                     DeleteAction::make()
                         ->color('danger')
-                        ->visible(fn() => Gate::allows('is-super-admin')),
+                        ->visible(fn() => Gate::allows('is-super-admin'))
+                        ->before(function (Station $record, DeleteAction $action) {
+                            $visitsCount = $record->visits()->count();
+                            if ($visitsCount > 0) {
+                                Notification::make()
+                                    ->title('Cannot delete this station')
+                                    ->body("Station {$record->code} has {$visitsCount} visit(s) in its history. To preserve the audit trail, deactivate it instead (Edit → toggle Active off).")
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        }),
                 ])->color('gray')->tooltip('Actions'),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make()
-                    ->visible(fn() => Gate::allows('is-super-admin')),
+                    ->visible(fn() => Gate::allows('is-super-admin'))
+                    ->before(function (\Illuminate\Database\Eloquent\Collection $records, DeleteBulkAction $action) {
+                        $blocked = $records->filter(fn(Station $s) => $s->visits()->exists());
+                        if ($blocked->isNotEmpty()) {
+                            $codes = $blocked->pluck('code')->take(5)->implode(', ');
+                            $extra = $blocked->count() > 5 ? ' …' : '';
+                            Notification::make()
+                                ->title('Some stations cannot be deleted')
+                                ->body("These have visit history and must stay for auditing: {$codes}{$extra}. Deactivate them instead.")
+                                ->danger()
+                                ->persistent()
+                                ->send();
+
+                            $action->cancel();
+                        }
+                    }),
             ]);
     }
 

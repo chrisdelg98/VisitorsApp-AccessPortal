@@ -21,12 +21,14 @@ class StationDeviceLog extends Model
         'registered_ip',
         'registered_at',
         'unregistered_by',
+        'unregistered_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'registered_at' => 'datetime',
+            'registered_at'   => 'datetime',
+            'unregistered_at' => 'datetime',
         ];
     }
 

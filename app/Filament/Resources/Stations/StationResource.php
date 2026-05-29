@@ -254,6 +254,8 @@ class StationResource extends Resource
                         ->color('gray')
                         ->slideOver()
                         ->modalHeading('Tablet history')
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Close')
                         ->infolist(fn(Schema $schema, Station $record): Schema =>
                             $schema->components([
                                 Section::make('Currently registered')
@@ -286,22 +288,39 @@ class StationResource extends Resource
                                     ->description(fn() =>
                                         $record->deviceLogs->isEmpty()
                                             ? 'No previous pairings recorded.'
-                                            : 'Each entry is a tablet that was previously paired with this station and later unregistered.'
+                                            : 'Each row is a tablet that was paired with this station and later unregistered.'
                                     )
                                     ->schema([
                                         RepeatableEntry::make('logs')
                                             ->hiddenLabel()
                                             ->state(fn() => $record->deviceLogs)
+                                            ->columns([
+                                                'default' => 1,
+                                                'md'      => 2,
+                                                'lg'      => 4,
+                                            ])
                                             ->schema([
-                                                TextEntry::make('device_model')->label('Model')->placeholder('—'),
+                                                TextEntry::make('device_model')
+                                                    ->label('Model')
+                                                    ->placeholder('—'),
                                                 TextEntry::make('registered_at')
-                                                    ->label('Was registered at')
+                                                    ->label('Registered')
                                                     ->html()
                                                     ->formatStateUsing(fn($state) =>
                                                         $state ? TzFormatter::forCountry(\Carbon\Carbon::parse($state), $record->country) : null
                                                     )
                                                     ->placeholder('—'),
-                                                TextEntry::make('unregistered_by')->label('Unregistered by')->badge()->placeholder('—'),
+                                                TextEntry::make('unregistered_at')
+                                                    ->label('Unregistered')
+                                                    ->html()
+                                                    ->formatStateUsing(fn($state) =>
+                                                        $state ? TzFormatter::forCountry(\Carbon\Carbon::parse($state), $record->country) : null
+                                                    )
+                                                    ->placeholder('—'),
+                                                TextEntry::make('unregistered_by')
+                                                    ->label('Reason')
+                                                    ->badge()
+                                                    ->placeholder('—'),
                                             ])
                                             ->visible(fn() => $record->deviceLogs->isNotEmpty()),
                                     ]),

@@ -90,6 +90,7 @@ class Station extends Model
             'registered_ip'     => $this->registered_ip,
             'registered_at'     => $this->registered_at,
             'unregistered_by'   => $unregisteredBy,
+            'unregistered_at'   => now(),
         ]);
 
         $this->update([

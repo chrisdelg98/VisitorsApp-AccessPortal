@@ -75,6 +75,16 @@ class StationsMap extends Page
             ->values()
             ->toArray();
 
-        return compact('stations');
+        $counts = [
+            'active'    => 0,
+            'no-tablet' => 0,
+            'inactive'  => 0,
+        ];
+        foreach ($stations as $s) {
+            $counts[$s['status']] = ($counts[$s['status']] ?? 0) + 1;
+        }
+        $counts['total'] = count($stations);
+
+        return compact('stations', 'counts');
     }
 }

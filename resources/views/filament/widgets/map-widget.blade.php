@@ -75,6 +75,15 @@ function eflMap(stations) {
         init() {
             if (!stations || stations.length === 0) return;
 
+            // Si Livewire re-monta el componente (navegación SPA), el contenedor
+            // queda con marca de Leaflet de la visita anterior. Liberamos antes
+            // de inicializar para evitar el error "Map container is already initialized".
+            const el = L.DomUtil.get('efl-station-map');
+            if (el && el._leaflet_id) {
+                el._leaflet_id = null;
+                el.innerHTML = '';
+            }
+
             this.map = L.map('efl-station-map', {
                 worldCopyJump: true,
                 minZoom: 2,

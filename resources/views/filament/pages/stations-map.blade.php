@@ -26,6 +26,63 @@
         .efl-map-popup .efl-popup-btn:hover {
             background: #1d4ed8;
         }
+
+        /* ── Map legend (chips en línea, separados con divisor sutil) ── */
+        .efl-map-legend {
+            margin-top: 16px;
+            padding: 10px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #ffffff;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            row-gap: 8px;
+            column-gap: 18px;
+        }
+        .efl-map-legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .efl-map-legend-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .efl-map-legend-label {
+            font-size: 13px;
+            color: #374151;
+        }
+        .efl-map-legend-count {
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .efl-map-legend-sep {
+            display: inline-block;
+            width: 1px;
+            height: 16px;
+            background: #e5e7eb;
+        }
+        .efl-map-legend-total {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #6b7280;
+            white-space: nowrap;
+        }
+        /* Dark mode */
+        .dark .efl-map-legend {
+            border-color: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .dark .efl-map-legend-label { color: #d1d5db; }
+        .dark .efl-map-legend-sep { background: rgba(255, 255, 255, 0.10); }
+        .dark .efl-map-legend-total { color: #9ca3af; }
     </style>
 @endonce
 
@@ -45,20 +102,35 @@
                 <div id="efl-stations-map-page" style="height: 75vh; width: 100%; border-radius: 0.5rem;"></div>
             </div>
 
-            <div class="flex flex-wrap gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
-                <span class="flex items-center gap-1">
-                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e"></span>
-                    Active with tablet
-                </span>
-                <span class="flex items-center gap-1">
-                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b"></span>
-                    Active without tablet
-                </span>
-                <span class="flex items-center gap-1">
-                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444"></span>
-                    Inactive
-                </span>
-                <span class="ml-auto text-gray-400">{{ count($stations) }} station(s) on the map</span>
+            <div class="efl-map-legend">
+                <div class="efl-map-legend-item">
+                    <span class="efl-map-legend-dot" style="background:#22c55e;"></span>
+                    <span class="efl-map-legend-label">Active with tablet</span>
+                    <span class="efl-map-legend-count" style="color:#15803d;">{{ $counts['active'] }}</span>
+                </div>
+
+                <span class="efl-map-legend-sep"></span>
+
+                <div class="efl-map-legend-item">
+                    <span class="efl-map-legend-dot" style="background:#f59e0b;"></span>
+                    <span class="efl-map-legend-label">Active without tablet</span>
+                    <span class="efl-map-legend-count" style="color:#b45309;">{{ $counts['no-tablet'] }}</span>
+                </div>
+
+                <span class="efl-map-legend-sep"></span>
+
+                <div class="efl-map-legend-item">
+                    <span class="efl-map-legend-dot" style="background:#ef4444;"></span>
+                    <span class="efl-map-legend-label">Inactive</span>
+                    <span class="efl-map-legend-count" style="color:#b91c1c;">{{ $counts['inactive'] }}</span>
+                </div>
+
+                <div class="efl-map-legend-total">
+                    <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                    </svg>
+                    <span>{{ $counts['total'] }} station{{ $counts['total'] === 1 ? '' : 's' }} on the map</span>
+                </div>
             </div>
         </div>
     @endif
@@ -72,6 +144,15 @@ function eflStationsMapPage(stations) {
 
         init() {
             if (!stations || stations.length === 0) return;
+
+            // Si Livewire re-monta el componente (navegación SPA), el contenedor
+            // queda con marca de Leaflet de la visita anterior. Liberamos antes
+            // de inicializar para evitar el error "Map container is already initialized".
+            const el = L.DomUtil.get('efl-stations-map-page');
+            if (el && el._leaflet_id) {
+                el._leaflet_id = null;
+                el.innerHTML = '';
+            }
 
             this.map = L.map('efl-stations-map-page', {
                 worldCopyJump: true,

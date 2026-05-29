@@ -158,7 +158,7 @@ class VisitResource extends Resource
                 ]),
 
             // ── Recorrido entre sucursales / Re-entradas ──
-            Section::make('Re-entradas y recorrido entre sucursales')
+            Section::make('Re-Entries and Branch-to-Branch Travel')
                 ->icon(Heroicon::OutlinedArrowsRightLeft)
                 ->columnSpanFull()
                 ->visible(fn ($record) =>
@@ -172,13 +172,13 @@ class VisitResource extends Resource
                         ->visible(fn ($record) => ($record->reentry_count ?? 0) > 0)
                         ->schema([
                             TextEntry::make('reentry_count')
-                                ->label('Re-entradas mismo día (misma estación)')
+                                ->label('Same-Day Re-Entries (Same Station)')
                                 ->badge()
                                 ->color('warning')
                                 ->icon(Heroicon::OutlinedArrowPath),
 
                             TextEntry::make('last_reentry_at')
-                                ->label('Último reingreso')
+                                ->label('Last Re-Entry')
                                 ->html()
                                 ->formatStateUsing(fn(Visit $record) =>
                                     TzFormatter::forCountry($record->last_reentry_at, $record->station?->country)
